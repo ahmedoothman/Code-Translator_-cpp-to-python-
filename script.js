@@ -2,7 +2,7 @@ const fileInput = document.getElementById('file-input');
 const convertCode = document.getElementById('convert-code');
 const inputBox = document.getElementById('input-box');
 const outputBox = document.getElementById('output-box');
-
+const downloadBtn = document.getElementById('download-btn');
 let theCode;
 let outputCode;
 
@@ -50,8 +50,6 @@ const translateHandler = () => {
   outputCode = 'your output code';
   // show the output
   outputBox.value = outputCode;
-  // download the output in file
-  downloadHandler();
 };
 
 /****************************************************************************/
@@ -78,3 +76,8 @@ const downloadHandler = () => {
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
+/****************************************************************************/
+/* Name : Download */
+/* Desc : download the file */
+/****************************************************************************/
+downloadBtn.addEventListener('click', downloadHandler);
