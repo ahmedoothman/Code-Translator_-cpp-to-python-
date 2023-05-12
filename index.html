@@ -17,25 +17,31 @@
           <img src="./assets/Converter.svg" alt="" />
         </div>
         <div class="actions">
-          <input type="file" />
-          <button class="convert-file">Convert</button>
+          <input type="file" id="file-input" />
         </div>
       </div>
     </header>
     <section>
+      <button id="convert-code">Convert</button>
       <div class="code">
         <div class="input">
           <h1>Input</h1>
-          <textarea name="" id="" cols="30" rows="10"></textarea>
+          <textarea name="" id="input-box" cols="30" rows="10"></textarea>
         </div>
         <div class="output">
           <h1>output</h1>
-          <textarea name="" id="" cols="30" rows="10"></textarea>
+          <textarea
+            name=""
+            id="output-box"
+            cols="30"
+            rows="10"
+            disabled
+          ></textarea>
         </div>
       </div>
-      <div class="header-code">
-        <button class="convert-input">Convert</button>
-      </div>
+      <div class="header-code"></div>
     </section>
+    <!-- SCript -->
+    <script src="script.js"></script>
   </body>
 </html>
