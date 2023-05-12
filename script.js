@@ -70,7 +70,7 @@ const downloadHandler = () => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   const currentDate = new Date().getTime();
-  const fileName = `output-python-${currentDate}.txt`;
+  const fileName = `output-python-${currentDate}.py`;
   link.download = fileName;
   link.href = url;
   document.body.appendChild(link);
