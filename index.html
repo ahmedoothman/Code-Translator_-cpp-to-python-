@@ -4,6 +4,21 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- codemirror -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css"
+      integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/material-darker.min.css"
+      integrity="sha512-2OhXH4Il3n2tHKwLLSDPhrkgnLBC+6lHGGQzSFi3chgVB6DJ/v6+nbx+XYO9CugQyHVF/8D/0k3Hx1eaUK2K9g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
     <link href="style.css" rel="stylesheet" />
     <title>Code Translator</title>
   </head>
@@ -17,6 +32,10 @@
           <img src="./assets/Converter.svg" alt="" />
         </div>
         <div class="actions">
+          <div class="file-input-box">
+            <label for="file-input">Choose file</label>
+            <p id="file-input-name">no file chosen</p>
+          </div>
           <input type="file" id="file-input" />
         </div>
       </div>
@@ -24,12 +43,16 @@
     <section>
       <button id="convert-code">
         <img src="./assets/opposite_opinion.svg" alt="" />
-        Convert
+        Translate
       </button>
       <div class="code">
         <div class="input">
           <h1>Input</h1>
-          <textarea name="" id="input-box" cols="30" rows="10"></textarea>
+          <textarea
+            name=""
+            id="input-box"
+            style="border-radius: 10px"
+          ></textarea>
         </div>
         <div class="output">
           <div class="output-header">
@@ -45,15 +68,46 @@
           <textarea
             name=""
             id="output-box"
-            cols="30"
-            rows="10"
             disabled
+            style="border-radius: 10px"
           ></textarea>
         </div>
       </div>
       <div class="header-code"></div>
     </section>
+    <!-- Codemirror -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"
+      integrity="sha512-8RnEqURPUc5aqFEN04aQEiPlSAdE0jlFS/9iGgUyNtwFnSKCXhmB6ZTNl7LnDtDWKabJIASzXrzD0K+LYexU9g=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/clike/clike.min.js"
+      integrity="sha512-l8ZIWnQ3XHPRG3MQ8+hT1OffRSTrFwrph1j1oc1Fzc9UKVGef5XN9fdO0vm3nW0PRgQ9LJgck6ciG59m69rvfg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/python/python.min.js"
+      integrity="sha512-2M0GdbU5OxkGYMhakED69bw0c1pW3Nb0PeF3+9d+SnwN1ryPx3wiDdNqK3gSM7KAU/pEV+2tFJFbMKjKAahOkQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"
+      integrity="sha512-GSYCbN/le5gNmfAWVEjg1tKnOH7ilK6xCLgA7c48IReoIR2g2vldxTM6kZlN6o3VtWIe6fHu/qhwxIt11J8EBA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"
+      integrity="sha512-tsjcYO5hFvViRssxiM7Jhd8601epWOx1He3Hl4yuI5dKKPxr43KxkOhc9GZeeqzlYJm9ABb7UPA9697NiqZZ7Q=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
     <!-- SCript -->
-    <script src="script.js"></script>
+    <script src="./js/script.js"></script>
+    <script src="./js/codemirror.js"></script>
   </body>
 </html>
