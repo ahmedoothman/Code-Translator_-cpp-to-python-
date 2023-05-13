@@ -5,9 +5,11 @@ const outputBox = document.getElementById('output-box');
 const downloadBtn = document.getElementById('download-btn');
 let theCode;
 let outputCode;
-
+let lookAheadIndex = 0 ;
+let parseTree ;
 const constants = [ "main" ,"int", "void", "char", "\\}", "if" , "\\(", "\\)", "\\{", "return" , "\\==", "\\=", "\\>=", "\\<=","<", ">", "\\+", "\\-", "\\/", "\\*", ";", "\\w+"];
-var tokens = [] ;
+const brackets = ["(" , ")" , "{", "}", "[", "]"];
+let tokens = [] ;
 /****************************************************************************/
 /* Name : handle input file */
 /* Desc : take the input file and get ad string */
@@ -47,9 +49,18 @@ const translateHandler = () => {
   // you can use it to convert it to python code
 
   /* logic implementation */
+  tokens = [];
+  lookAheadIndex = 0;
   tokenize();
-
-  outputCode =words; 
+  try{
+    main_stmt();
+    
+    outputCode = pre_order(); 
+  }catch(e){
+    console.log(e);
+    outputCode =e; 
+  }
+ 
   //Tokenize()
   //Parse()
   //Translate()
@@ -109,10 +120,9 @@ function tokenize(){
   theCode = theCode.replace("\n", "");
   theCode = theCode.replace(/\s+/g, "");
   const words = theCode.match(regExpPattern);
-  
   words.forEach(lexem => {
-    console.log(lexem);
-    if (constants.includes(lexem)){
+    //console.log(lexem);
+    if (constants.includes(lexem) || brackets.includes(lexem)){
       tokens.push(new Token(lexem, "const"));
     }else{ //id
       tokens.push(new Token(lexem, "var"));
@@ -121,10 +131,156 @@ function tokenize(){
 };
 /****************************************************************************/
 
+function match(token){
+  //console.log(token);
+    if (token == tokens[lookAheadIndex].name){
+        if (lookAheadIndex < tokens.length){
+          lookAheadIndex ++ ;
+        }else{
+          return "end";
+        }
+    }else{
+      throw "expected token " +token ; 
+    }
+}
+
+function matchDigit(){
+  if (  isNumeric(tokens[lookAheadIndex].name)){
+      if (lookAheadIndex < tokens.length){
+        lookAheadIndex ++ ;
+        return tokens[lookAheadIndex].name ;
+      }
+  }else{
+    throw "expected token " +token ; 
+  }
+}
+
+
+function main_stmt(){
+ try{
+  if (tokens[lookAheadIndex].name == "int"){
+    match("int");
+    match("main");
+    match("(");
+    match(")");
+    match("{");
+    child =stmts();
+    match("return");
+    matchDigit();
+    match(";")
+    match("}");
+    parseTree = new Stament("_", "main_stmt", [child]);
+  }else{
+    throw "Can't find main function at the beginning of the program";
+  }
+ }catch(e){
+    throw e ;
+ } 
+}
+
+function stmts(){
+  console.log(tokens[lookAheadIndex].name);
+  console.log(tokens[lookAheadIndex].name == "if" || tokens[lookAheadIndex].type == "var");
+
+  if (tokens[lookAheadIndex].name == "if" || tokens[lookAheadIndex].type == "var"){
+    let child =stmt();
+    let children = stmts();
+    return new Stament("_", "stmts", [child, children] );
+  }
+  return null;
+}
+
+function stmt(){
+  if (tokens[lookAheadIndex].name == "if"){
+    match("if");
+    match("(");
+    //let condChild = cond();
+    match(")");
+    match("{");
+    let children =stmts();
+    condChild = children ;
+    match("}");
+    return new Stament( new Stament(["x", ">", "3"], "cond" , []), "if_cond", [children] );
+  }else if (tokens[lookAheadIndex].type == "var"){
+    asgmt();
+  }else{
+    throw "expected statment"
+  }
+}
+
+function asgmt(){
+  if (tokens[lookAheadIndex].type == "var"){
+    dataType();
+    match(tokens[lookAheadIndex].name);
+    match("=");
+    let digit = matchDigit();
+    match(";");
+    return new Stament(tokens[lookAheadIndex].type, "asmgt", [tokens[lookAheadIndex].name, digit] );
+    //expr();
+  }else{
+    throw "expected identifier";
+  }
+
+}
+
+function dataType(){
+  if (tokens[lookAheadIndex].name == "int" || tokens[lookAheadIndex].name == "char" || tokens[lookAheadIndex].name == "bool"){
+    match(tokens[lookAheadIndex].name);
+  }
+}
+
+function pre_order(){
+  let code = "" ;
+  parseTree.children.forEach(element => {
+    code = traverse(element);
+  });
+  return code ;
+}
+
+function traverse(node){
+  if (node == null){
+    return "";
+  }
+  let block = "";
+  node.children.forEach(element => {
+    block += traverse(element) + "\n";
+  });
+  block += translateStmt(node, block) + "\n";
+  return block ;
+}
+
+function translateStmt(stmt, block){
+  console.log(stmt.stmt_type);
+  switch (stmt.stmt_type) {
+    case "if_cond":
+      let result = "if " ;
+      stmt.tokens.tokens.forEach(element => {
+        result += element + " "
+      });
+      result += " :";
+      block.replace("\n", "\n   ");
+      return result + "\n" + block;  
+    default:
+      return "";  
+      break;
+  }
+}
+
+function isNumeric(value) {
+  return /^-?\d+$/.test(value);
+}
 
 class Token {
   constructor(token, type) {
     this.name = token;
-    this.year = type;
+    this.type = type;
+  }
+}
+
+class Stament{
+  constructor(tokens, stmt_type, children) {
+    this.tokens = tokens;
+    this.stmt_type = stmt_type;
+    this.children = children
   }
 }
