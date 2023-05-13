@@ -25,7 +25,29 @@ function handleFile(event) {
 
   reader.readAsText(file);
 }
-
+/****************************************************************************/
+/* Name : Download */
+/* Desc : download the file */
+/****************************************************************************/
+const downloadHandler = () => {
+  const content = outputCode;
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const currentDate = new Date().getTime();
+  const fileName = `output-python-${currentDate}.py`;
+  link.download = fileName;
+  link.href = url;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+/****************************************************************************/
+/* Name : Download */
+/* Desc : download the file */
+/****************************************************************************/
+downloadBtn.addEventListener('click', downloadHandler);
 /****************************************************************************/
 /* Name : handle input text */
 /* Desc : take the input text and get ad string */
