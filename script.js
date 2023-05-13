@@ -6,6 +6,8 @@ const downloadBtn = document.getElementById('download-btn');
 let theCode;
 let outputCode;
 
+const constants = [ "main" ,"int", "void", "char", "\\}", "if" , "\\(", "\\)", "\\{", "return" , "\\==", "\\=", "\\>=", "\\<=","<", ">", "\\+", "\\-", "\\/", "\\*", ";", "\\w+"];
+var tokens = [] ;
 /****************************************************************************/
 /* Name : handle input file */
 /* Desc : take the input file and get ad string */
@@ -45,9 +47,15 @@ const translateHandler = () => {
   // you can use it to convert it to python code
 
   /* logic implementation */
+  tokenize();
+
+  outputCode =words; 
+  //Tokenize()
+  //Parse()
+  //Translate()
 
   // save the output in the global variable outputCode
-  outputCode = 'your output code';
+  //outputCode = 'your output code';
   // show the output
   outputBox.value = outputCode;
 };
@@ -81,3 +89,42 @@ const downloadHandler = () => {
 /* Desc : download the file */
 /****************************************************************************/
 downloadBtn.addEventListener('click', downloadHandler);
+
+
+
+/****************************************************************************/
+/* Name : Tokenize */
+/* Desc : Tokenize the input string 
+          * take input string from variable TheCode
+          * tokenize the constants and varibles in list tokens
+*/
+function tokenize(){
+  var regExpPatternString = "";
+  for (var i = 0 ; i < constants.length ; i++){
+    regExpPatternString += constants[i] + "|";
+  }
+  regExpPatternString = regExpPatternString.slice(0, -1);
+  const regExpPattern = new RegExp(regExpPatternString, "g");
+
+  theCode = theCode.replace("\n", "");
+  theCode = theCode.replace(/\s+/g, "");
+  const words = theCode.match(regExpPattern);
+  
+  words.forEach(lexem => {
+    console.log(lexem);
+    if (constants.includes(lexem)){
+      tokens.push(new Token(lexem, "const"));
+    }else{ //id
+      tokens.push(new Token(lexem, "var"));
+    }
+  });
+};
+/****************************************************************************/
+
+
+class Token {
+  constructor(token, type) {
+    this.name = token;
+    this.year = type;
+  }
+}
