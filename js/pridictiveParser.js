@@ -34,6 +34,8 @@ function stmts() {
   if (
     tokens[lookAheadIndex].name == 'if' ||
     tokens[lookAheadIndex].name == 'while' ||
+    tokens[lookAheadIndex].name == 'for' ||
+    tokens[lookAheadIndex].name == 'switch' ||
     tokens[lookAheadIndex].type == 'var' ||
     tokens[lookAheadIndex].name == 'int' ||
     tokens[lookAheadIndex].name == 'char' ||
@@ -58,6 +60,9 @@ function stmt() {
 
   } else if (tokens[lookAheadIndex].name == 'while'){
     return while_stmt();
+  }
+  else if(tokens[lookAheadIndex].name == 'for'){
+    return for_stmt();
   }
   else if (tokens[lookAheadIndex].type == 'var' || 
       tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
@@ -137,6 +142,26 @@ function while_stmt(){
   }
 }
 
+
+function for_stmt(){
+  if (tokens[lookAheadIndex].name == 'for') {
+    match('for');
+    match('(');
+    let asgmtChild = asgmt();
+    let condChild = conds();
+    match(';');
+    let stepChild = asgmt();
+    match(')');         
+    match('{');
+    let children = stmts();
+    match('}');
+
+    return new Stament("for_stmt", [children,endBlock], false, [condChild,asgmtChild]);
+  }else{
+    throw 'expected while';
+  }
+}
+
 /****************************************************************************/
 /* Name: asgmt */
 /****************************************************************************/
@@ -146,18 +171,18 @@ function asgmt() {
     dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
-    let digit = matchDigit();
+    let expr = expr();
     match(';');
-    return new Stament("asgmt", [], true, [varaibleName, "=", digit]);
+    return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
     //expr();
 
   }else if (tokens[lookAheadIndex].type == 'var' ) {
     //dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
-    let digit = matchDigit();
+    let expr = expr();
     match(';');
-    return new Stament("asgmt", [], true, [varaibleName, "=", digit]);
+    return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
     //expr();
 
 }
@@ -374,7 +399,7 @@ function translateStmt(stmt, block) {
       indentCount ++ ;
       return  result ;
 
-      case 'else_if_stmt':
+    case 'else_if_stmt':
         result = 'elif ';
         /*stmt.extra[0].children.forEach((element) => {
           result += element + ' ';
@@ -388,7 +413,7 @@ function translateStmt(stmt, block) {
         indentCount++;
         return  result;
     
-      case 'else_stmt':
+    case 'else_stmt':
           result = 'else :';
         
           block= '\t' + block;
@@ -412,14 +437,24 @@ function translateStmt(stmt, block) {
         //result = result.replaceAll('\n', '\n\t');
         return result ;//+ "\n";
      
-      case 'while_stmt':
+    case 'while_stmt':
         result = 'while ';
         result += traverseConds(stmt.extra[0], "");      
         result += ' :';
         indentCount ++ ;
         return  result ;
 
-      case 'end_block':
+    case 'for_stmt':
+          result = 'for ';
+          result += stmt.extra[1].extra[0];  
+          result+= ' in range(';
+          result+=stmt.extra[0].children[0].extra[2];
+          result +=')'   
+          result += ' :';
+          indentCount ++ ;
+          return  result ;  
+
+    case 'end_block':
          indentCount -- ;
         // console.log(indentCount);
          return "";
@@ -457,4 +492,77 @@ class Stament {
   }
 }
 const endBlock = new Stament('end_block', [], false, []);
+
+
+function expr (){
+  term();
+  rest();
+}
+
+
+
+function term (){
+  factor();
+  rest1();
+}
+
+
+
+
+function rest (){
+  if (tokens[lookAheadIndex].name = ('+')) {
+    match('+'); 
+    term(); 
+    rest();
+  } else if (token[lookAheadIndex].name = '-') {
+    match('-'); 
+    term(); 
+    rest();
+  }
+  
+  else{
+    return;
+  }
+  
+}
+
+
+function rest1(){
+  if (tokens[lookAheadIndex].name = '*') {
+    match('*'); 
+    factor(); 
+    rest1();
+  } else if (tokens[lookAheadIndex].name = '/') {
+    match('/'); 
+    factor(); 
+    rest1();
+  } else{
+    return;
+  }
+  
+
+}
+
+
+function factor(){
+  if (isNumeric(tokens[lookAheadIndex].name)) {
+    matchDigit();
+  }else if ( tokens[lookAheadIndex].type == "var") {
+    match(id);
+  }else if (lookahead = '(') {
+    match('(');
+    expr();
+    match(')');
+  }
+  else{
+    throw("error");
+  }
+}
+
+
+
+
+
+
+
 

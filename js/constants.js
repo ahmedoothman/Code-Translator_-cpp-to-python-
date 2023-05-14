@@ -13,7 +13,7 @@ const constants = [
   'return',
   '\\true',
   '\\false',
-
+  'for',
   '\\|\\|',
   '\\&\\&',
 
