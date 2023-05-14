@@ -68,8 +68,8 @@ const translateHandler = () => {
   tokenize();
   try {
     main_stmt();
-
-    outputCode = pre_order();
+   // translate();
+    outputCode =  translate();
   } catch (e) {
     console.log(e);
     outputCode = e;
@@ -106,8 +106,9 @@ function tokenize() {
   regExpPatternString = regExpPatternString.slice(0, -1);
   const regExpPattern = new RegExp(regExpPatternString, 'g');
 
+  theCode = theCode.replace(/ \/\/.*$ /, '');
   theCode = theCode.replace('\n', '');
-  theCode = theCode.replace(/\s+/g, '');
+  //theCode = theCode.replace(/\s+/g, '');
   const words = theCode.match(regExpPattern);
   words.forEach((lexem) => {
     //console.log(lexem);

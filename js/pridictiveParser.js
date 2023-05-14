@@ -1,3 +1,152 @@
+
+/****************************************************************************/
+/* Name: main_stmt */
+/****************************************************************************/
+let indentCount = 0;
+
+function main_stmt() {
+  try {
+    if (tokens[lookAheadIndex].name == 'int') {
+      match('int');
+      match('main');
+      match('(');
+      match(')');
+      match('{');
+      child = stmts();
+      match('return');
+      matchDigit();
+      match(';');
+      match('}');
+      parseTree = new Stament('main_stmt', [child], false, []);
+      return
+    } else {
+      throw "Can't find main function at the beginning of the program";
+    }
+  } catch (e) {
+    throw e;
+  }
+}
+/****************************************************************************/
+/* Name: stmts */
+/****************************************************************************/
+function stmts() {
+ 
+  if (
+    tokens[lookAheadIndex].name == 'if' ||
+    tokens[lookAheadIndex].type == 'var' ||
+    tokens[lookAheadIndex].name == 'int' ||
+    tokens[lookAheadIndex].name == 'char' ||
+    tokens[lookAheadIndex].name == 'bool' 
+    ) {
+    let child = stmt();
+    let children = stmts();
+    return new Stament('stmts', [child, children], false, []);
+  }
+  //return null;
+}
+/****************************************************************************/
+/* Name: stmt */
+/****************************************************************************/
+function stmt() {
+  if (tokens[lookAheadIndex].name == 'if') {
+    return if_stmt();
+   // return new Stament("if_stmt", [children], false, [condChild]);
+
+  } else if (tokens[lookAheadIndex].type == 'var' || 
+      tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
+      || tokens[lookAheadIndex].name == 'bool') {
+    let result = asgmt();
+    return new Stament("stmt", [result], false, []);
+  } else {
+    throw 'expected statment';
+  }
+}
+
+function if_stmt(){
+  if (tokens[lookAheadIndex].name == 'if') {
+    match('if');
+    match('(');
+    let condChild = cond();
+    match(')');
+    match('{');
+    let children = stmts();
+    match('}');
+    let elseIfChildren =elseif();
+    let elseChildren = else_stmt();
+
+    return new Stament("if_stmt", [children,endBlock, elseIfChildren, elseChildren ,], false, [condChild]);
+  }else{
+    throw 'expected if';
+  }
+}
+
+function elseif(){
+  if (tokens[lookAheadIndex].name == 'else if') {
+    match('else if');
+    match('(');
+    let condChild = cond();
+    match(')');
+    match('{');
+    let children = stmts();
+    match('}');
+    let elseIfChildren =elseif();
+    return new Stament("else_if_stmt", [children, endBlock , elseIfChildren ], false, [condChild]);
+  }
+}
+
+function else_stmt(){
+  if (tokens[lookAheadIndex].name == 'else') {
+    match('else');
+    match('{');
+    let children = stmts();
+    match('}');
+    return new Stament("else_stmt", [children, endBlock], false, []);
+  }
+}
+
+/****************************************************************************/
+/* Name: asgmt */
+/****************************************************************************/
+function asgmt() {
+  if (tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
+     || tokens[lookAheadIndex].name == 'bool') {
+    dataType();
+    let varaibleName = match(tokens[lookAheadIndex].name);
+    match('=');
+    let digit = matchDigit();
+    match(';');
+    return new Stament("asgmt", [], true, [varaibleName, "=", digit]);
+    //expr();
+
+  }else if (tokens[lookAheadIndex].type == 'var' ) {
+    //dataType();
+    let varaibleName = match(tokens[lookAheadIndex].name);
+    match('=');
+    let digit = matchDigit();
+    match(';');
+    return new Stament("asgmt", [], true, [varaibleName, "=", digit]);
+    //expr();
+
+}
+   else {
+    throw 'expected identifier';
+  }
+}
+
+function dataType() {
+  if (
+    tokens[lookAheadIndex].name == 'int' ||
+    tokens[lookAheadIndex].name == 'char' ||
+    tokens[lookAheadIndex].name == 'bool'
+  ) {
+    let token =tokens[lookAheadIndex].name;
+    match(tokens[lookAheadIndex].name);
+    return token;
+  }
+  return null ;
+}
+
+
 /****************************************************************************/
 /* Name: Match */
 /* Desc: Match the token with the next token in the list
@@ -14,11 +163,23 @@ function match(token) {
   if (token == tokens[lookAheadIndex].name) {
     if (lookAheadIndex < tokens.length) {
       lookAheadIndex++;
+      return token;
     } else {
       return 'end';
     }
   } else {
     throw 'expected token ' + token;
+  }
+}
+
+function matchRelop(token) {
+  //console.log(token);
+  if (token == '==' || token == '>=' || token == '<='
+      || token == '!=' || token == '<' || token == '>') {
+      lookAheadIndex++;
+      return token;
+  } else {
+    throw 'expected relop ' ;
   }
 }
 /****************************************************************************/
@@ -35,116 +196,36 @@ function match(token) {
 function matchDigit() {
   if (isNumeric(tokens[lookAheadIndex].name)) {
     if (lookAheadIndex < tokens.length) {
+      let digit = tokens[lookAheadIndex].name;
       lookAheadIndex++;
-      return tokens[lookAheadIndex].name;
+    
+      return digit;
     }
   } else {
     throw 'expected token ' + token;
   }
 }
-/****************************************************************************/
-/* Name: maib_stmt */
-/****************************************************************************/
-function main_stmt() {
-  try {
-    if (tokens[lookAheadIndex].name == 'int') {
-      match('int');
-      match('main');
-      match('(');
-      match(')');
-      match('{');
-      child = stmts();
-      match('return');
-      matchDigit();
-      match(';');
-      match('}');
-      parseTree = new Stament('_', 'main_stmt', [child]);
-    } else {
-      throw "Can't find main function at the beginning of the program";
-    }
-  } catch (e) {
-    throw e;
-  }
-}
-/****************************************************************************/
-/* Name: stmts */
-/****************************************************************************/
-function stmts() {
-  console.log(tokens[lookAheadIndex].name);
-  console.log(
-    tokens[lookAheadIndex].name == 'if' || tokens[lookAheadIndex].type == 'var'
-  );
 
-  if (
-    tokens[lookAheadIndex].name == 'if' ||
-    tokens[lookAheadIndex].type == 'var'
-  ) {
-    let child = stmt();
-    let children = stmts();
-    return new Stament('_', 'stmts', [child, children]);
-  }
-  return null;
-}
-/****************************************************************************/
-/* Name: stmt */
-/****************************************************************************/
-function stmt() {
-  if (tokens[lookAheadIndex].name == 'if') {
-    match('if');
-    match('(');
-    //let condChild = cond();
-    match(')');
-    match('{');
-    let children = stmts();
-    condChild = children;
-    match('}');
-    return new Stament(new Stament(['x', '>', '3'], 'cond', []), 'if_cond', [
-      children,
-    ]);
-  } else if (tokens[lookAheadIndex].type == 'var') {
-    asgmt();
-  } else {
-    throw 'expected statment';
-  }
-}
-/****************************************************************************/
-/* Name: asgmt */
-/****************************************************************************/
-function asgmt() {
+function cond(){
   if (tokens[lookAheadIndex].type == 'var') {
-    dataType();
-    match(tokens[lookAheadIndex].name);
-    match('=');
+    let id = match(tokens[lookAheadIndex].name);
+    let relop =matchRelop(tokens[lookAheadIndex].name);
     let digit = matchDigit();
-    match(';');
-    return new Stament(tokens[lookAheadIndex].type, 'asmgt', [
-      tokens[lookAheadIndex].name,
-      digit,
-    ]);
-    //expr();
-  } else {
-    throw 'expected identifier';
-  }
+    return new Stament("cond", [id, relop, digit], true ,[id, relop, digit] );
+  } 
 }
-/****************************************************************************/
-/* Name: dataType */
-/****************************************************************************/
-function dataType() {
-  if (
-    tokens[lookAheadIndex].name == 'int' ||
-    tokens[lookAheadIndex].name == 'char' ||
-    tokens[lookAheadIndex].name == 'bool'
-  ) {
-    match(tokens[lookAheadIndex].name);
-  }
-}
+
+
+
 /****************************************************************************/
 /* Name: pre_order */
 /****************************************************************************/
-function pre_order() {
-  let code = '';
+function translate() {
+  let code = translateStmt(parseTree, '');
+  console.log(indentCount);
+  code +="\n";
   parseTree.children.forEach((element) => {
-    code = traverse(element);
+    code += traverse(element);
   });
   return code;
 }
@@ -157,10 +238,27 @@ function traverse(node) {
     return '';
   }
   let block = '';
+  let indentation = "";
+    for(var i=0 ; i <indentCount ; i++){
+      indentation += "   ";
+  }
+  block = translateStmt(node, block)
+  
+  if (block != ""){
+    //console.log(block);
+    
+    //block = indentation + block  + '\n';
+    block += '\n';
+    block = indentation + block ;
+   }
+
   node.children.forEach((element) => {
-    block += traverse(element) + '\n';
+    parsedStmt = traverse(element) ;
+    block += parsedStmt ;
+    //console.log(j);
+    
   });
-  block += translateStmt(node, block) + '\n';
+
   return block;
 }
 /****************************************************************************/
@@ -168,18 +266,63 @@ function traverse(node) {
 /* input: stmt , block */
 /****************************************************************************/
 function translateStmt(stmt, block) {
-  console.log(stmt.stmt_type);
+  let result = "";
   switch (stmt.stmt_type) {
-    case 'if_cond':
-      let result = 'if ';
-      stmt.tokens.tokens.forEach((element) => {
+    case 'if_stmt':
+      result = 'if ';
+      stmt.extra[0].children.forEach((element) => {
         result += element + ' ';
       });
       result += ' :';
-      block.replace('\n', '\n   ');
-      return result + '\n' + block;
+      //block= '\t' + block;
+      
+      //result = result + '\n' ;
+      //result = result.replaceAll('\n', '\n\t');
+      indentCount ++ ;
+      return  result ;
+
+      case 'else_if_stmt':
+        result = 'elif ';
+        stmt.extra[0].children.forEach((element) => {
+          result += element + ' ';
+        });
+        result += ' :';
+        //block= '\t' + block;
+        //result = result + '\n';
+        //console.log(block);
+        //result = result.replaceAll('\n', '\n\t');
+        indentCount++;
+        return  result;
+    
+      case 'else_stmt':
+          result = 'else :';
+        
+          block= '\t' + block;
+          //result = result + '\t\n' + block;
+          //console.log(block);
+          result = result.replaceAll('\n', '\n\t');
+          indentCount ++ ;
+          return  result;
+    
+    case 'main_stmt':
+        result = 'if __name__ == "__main__":';
+        //result = result + '\n' + block ;
+        //result = result.replaceAll('\n', '\n\t');
+        indentCount ++;
+        return  result; //+ "\n";
+    case 'asgmt':
+        stmt.extra.forEach((element) => {
+          result += element + ' ' ;
+        });
+        //result = result+ '\n' + block;
+        //result = result.replaceAll('\n', '\n\t');
+        return result ;//+ "\n";
+     case 'end_block':
+         indentCount -- ;
+        // console.log(indentCount);
+         return "";
     default:
-      return '';
+      return "";
       break;
   }
 }
@@ -203,9 +346,13 @@ class Token {
 /* Name: Stament */
 /****************************************************************************/
 class Stament {
-  constructor(tokens, stmt_type, children) {
-    this.tokens = tokens;
+  constructor(stmt_type, children, isLeaf, extra) {
     this.stmt_type = stmt_type;
     this.children = children;
+    this.isLeaf = isLeaf;
+    this.extra = extra;
+
   }
 }
+const endBlock = new Stament('end_block', [], false, []);
+
