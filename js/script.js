@@ -74,15 +74,6 @@ const translateHandler = () => {
     console.log(e);
     outputCode = e;
   }
-
-  //Tokenize()
-  //Parse()
-  //Translate()
-
-  // save the output in the global variable outputCode
-  //outputCode = 'your output code';
-
-  // set the output code in the output editor
   outputEditor.setValue(outputCode);
 };
 
@@ -111,7 +102,6 @@ function tokenize() {
   //theCode = theCode.replace(/\s+/g, '');
   const words = theCode.match(regExpPattern);
   words.forEach((lexem) => {
-   
     if (constants.includes(lexem) || brackets.includes(lexem)) {
       tokens.push(new Token(lexem, 'const'));
     } else {

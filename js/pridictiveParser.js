@@ -33,13 +33,15 @@ function stmts() {
  
   if (
     tokens[lookAheadIndex].name == 'if' ||
+    tokens[lookAheadIndex].name == 'while' ||
     tokens[lookAheadIndex].type == 'var' ||
     tokens[lookAheadIndex].name == 'int' ||
     tokens[lookAheadIndex].name == 'char' ||
     tokens[lookAheadIndex].name == 'bool' 
+    //TODO add for, while, do, switch
     ) {
     let child = stmt();
-    let children = stmts();
+    let children = stmts(); 
     return new Stament('stmts', [child, children], false, []);
   }
   //return null;
@@ -47,12 +49,17 @@ function stmts() {
 /****************************************************************************/
 /* Name: stmt */
 /****************************************************************************/
+
+//stmt -> asmt | if_else | while_stmt
 function stmt() {
   if (tokens[lookAheadIndex].name == 'if') {
     return if_stmt();
    // return new Stament("if_stmt", [children], false, [condChild]);
 
-  } else if (tokens[lookAheadIndex].type == 'var' || 
+  } else if (tokens[lookAheadIndex].name == 'while'){
+    return while_stmt();
+  }
+  else if (tokens[lookAheadIndex].type == 'var' || 
       tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
       || tokens[lookAheadIndex].name == 'bool') {
     let result = asgmt();
@@ -61,14 +68,22 @@ function stmt() {
     throw 'expected statment';
   }
 }
-
+/*
+  if
+    ofdfodfo
+    djodgmjdogj
+    dgsjogsgog
+    end_stmt
+  elif
+  else
+  int omosmgf
+*/
 function if_stmt(){
   if (tokens[lookAheadIndex].name == 'if') {
     match('if');
     match('(');
     let condChild = conds();
-    console.log(tokens[lookAheadIndex]);
-    match(')');
+    match(')');         
     match('{');
     let children = stmts();
     match('}');
@@ -102,6 +117,23 @@ function else_stmt(){
     let children = stmts();
     match('}');
     return new Stament("else_stmt", [children, endBlock], false, []);
+  }
+}
+
+
+function while_stmt(){
+  if (tokens[lookAheadIndex].name == 'while') {
+    match('while');
+    match('(');
+    let condChild = conds();
+    match(')');         
+    match('{');
+    let children = stmts();
+    match('}');
+
+    return new Stament("while_stmt", [children,endBlock], false, [condChild]);
+  }else{
+    throw 'expected while';
   }
 }
 
@@ -252,11 +284,9 @@ function cond(){
 
 
 /****************************************************************************/
-/* Name: pre_order */
 /****************************************************************************/
 function translate() {
   let code = translateStmt(parseTree, '');
-  console.log(indentCount);
   code +="\n";
   parseTree.children.forEach((element) => {
     code += traverse(element);
@@ -381,7 +411,15 @@ function translateStmt(stmt, block) {
         //result = result+ '\n' + block;
         //result = result.replaceAll('\n', '\n\t');
         return result ;//+ "\n";
-     case 'end_block':
+     
+      case 'while_stmt':
+        result = 'while ';
+        result += traverseConds(stmt.extra[0], "");      
+        result += ' :';
+        indentCount ++ ;
+        return  result ;
+
+      case 'end_block':
          indentCount -- ;
         // console.log(indentCount);
          return "";
