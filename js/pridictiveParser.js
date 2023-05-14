@@ -66,7 +66,8 @@ function if_stmt(){
   if (tokens[lookAheadIndex].name == 'if') {
     match('if');
     match('(');
-    let condChild = cond();
+    let condChild = conds();
+    console.log(tokens[lookAheadIndex]);
     match(')');
     match('{');
     let children = stmts();
@@ -84,7 +85,7 @@ function elseif(){
   if (tokens[lookAheadIndex].name == 'else if') {
     match('else if');
     match('(');
-    let condChild = cond();
+    let condChild = conds();
     match(')');
     match('{');
     let children = stmts();
@@ -206,13 +207,46 @@ function matchDigit() {
   }
 }
 
+function conds(){
+  if (tokens[lookAheadIndex].type == 'var'
+         || tokens[lookAheadIndex].name == "true" 
+         || tokens[lookAheadIndex].name == "false") {
+    let condNode = cond();
+    let condsNode= null ;
+    if (tokens[lookAheadIndex].name == "&&"){
+      match("&&");
+      condsNode = conds();
+      return new Stament("conds", [condNode, condsNode], false ,["and"] );
+
+    }else if (tokens[lookAheadIndex].name == "||"){
+      match("||");
+      condsNode = conds();
+      return new Stament("conds", [condNode, condsNode], false ,["or"] );
+
+    }else{
+      return new Stament("conds", [condNode,], false ,[""] );
+    }
+
+  }   
+}
+
+
 function cond(){
+  console.log(tokens[lookAheadIndex]);
+
   if (tokens[lookAheadIndex].type == 'var') {
     let id = match(tokens[lookAheadIndex].name);
     let relop =matchRelop(tokens[lookAheadIndex].name);
     let digit = matchDigit();
-    return new Stament("cond", [id, relop, digit], true ,[id, relop, digit] );
-  } 
+    return new Stament("cond", [], true ,[id, relop, digit] );
+  }else if (tokens[lookAheadIndex].name == "true"){
+    match("true");
+
+    return new Stament("cond", [], true ,["True", "", ""] );
+  } else if (tokens[lookAheadIndex].name == "false"){
+    match("false");
+    return new Stament("cond", [], true ,["False", "", ""]);
+  }
 }
 
 
@@ -261,6 +295,28 @@ function traverse(node) {
 
   return block;
 }
+
+function traverseConds(node,  opreator){
+  if (node == null) {
+    return '';
+  }
+  if (node.stmt_type == "conds"){
+    let conditonStatment = "";
+    node.children.forEach((element) => {
+      conditonStatment += traverseConds(element, node.extra[0]) ;      
+    });
+    return conditonStatment;
+  }else{
+    let parsedStatment = " ";
+    node.extra.forEach(element => {
+      parsedStatment += element + " ";
+    });
+    parsedStatment += " "+ opreator + " ";
+    return parsedStatment ;
+  }
+}
+
+
 /****************************************************************************/
 /* Name: translateStmt */
 /* input: stmt , block */
@@ -270,9 +326,16 @@ function translateStmt(stmt, block) {
   switch (stmt.stmt_type) {
     case 'if_stmt':
       result = 'if ';
-      stmt.extra[0].children.forEach((element) => {
-        result += element + ' ';
-      });
+      result += traverseConds(stmt.extra[0], "");      
+      /*console.log(stmt.extra[0]);
+      stmt.extra[0].children.forEach(condNode => {
+        condNode.children.forEach((element) => {
+          result += element + ' ';
+          result += condNode.extra[0]??"";
+        });
+        
+      });*/
+       
       result += ' :';
       //block= '\t' + block;
       
@@ -283,9 +346,10 @@ function translateStmt(stmt, block) {
 
       case 'else_if_stmt':
         result = 'elif ';
-        stmt.extra[0].children.forEach((element) => {
+        /*stmt.extra[0].children.forEach((element) => {
           result += element + ' ';
-        });
+        });*/
+        result += traverseConds(stmt.extra[0], "");      
         result += ' :';
         //block= '\t' + block;
         //result = result + '\n';
