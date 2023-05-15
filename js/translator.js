@@ -67,7 +67,13 @@ function translate() {
     switch (stmt.stmt_type) {
       case 'if_stmt':
         result = 'if ';
-        result += traverseConds(stmt.extra[0], "");      
+        if (stmt.extra[1] ?? false){
+            result += "!( ";
+        }
+        result += traverseConds(stmt.extra[0], "");   
+        if (stmt.extra[1] ?? false){
+            result += " )";
+        }   
         result += ' :';
         indentCount ++ ;
         return  result ;
@@ -103,6 +109,11 @@ function translate() {
           indentCount ++ ;
           return  result ;
   
+      case 'do_while_stmt':
+        result = 'while True :';
+        indentCount ++ ;
+        return  result ;
+
       case 'for_stmt':
             result = 'for ';
             result += stmt.extra[1].extra[0];  

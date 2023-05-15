@@ -168,14 +168,16 @@ function do_while_stmt(){
     let condChild = conds();
     match(')');         
     match(';');
-
-
-    return new Stament("do_while_stmt", [children??emptyBloc,endBlock], false, [condChild]);
+    return new Stament("do_while_stmt", [children, _generate_trailing_if(condChild),endBlock], false, []);
   }else{
     throw 'expected while';
   }
 }
 
+function _generate_trailing_if(condChild){
+  return new Stament("if_stmt", [new Stament('asgmt', [], false, ["break;"]),
+      endBlock], false, [condChild, true]);
+}
 
 /****************************************************************************/
 /* Name: asgmt */
@@ -349,6 +351,7 @@ class Stament {
   }
 }
 const endBlock = new Stament('end_block', [], false, []);
+
 const emptyBloc = new Stament('asgmt', [], false, ["pass"]);
 
 
