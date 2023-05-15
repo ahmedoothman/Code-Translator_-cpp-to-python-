@@ -144,7 +144,7 @@ function for_stmt(){
     let asgmtChild = asgmt();
     let condChild = conds();
     match(';');
-    let stepChild = asgmt();
+    let stepChild = asgmt(true);
     match(')');         
     match('{');
     let children = stmts();
@@ -182,7 +182,7 @@ function _generate_trailing_if(condChild){
 /****************************************************************************/
 /* Name: asgmt */
 /****************************************************************************/
-function asgmt() {
+function asgmt(passSemiColumn = false) {
   if (tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
      || tokens[lookAheadIndex].name == 'bool') {
     dataType();
@@ -190,17 +190,32 @@ function asgmt() {
     match('=');
     let exprResult = matchDigit();
    //  let exprResult = expr();
-    match(';');
+   passSemiColumn? null :match(';');
     return new Stament("asgmt", [], true, [varaibleName, "=", exprResult]);
 
   }else if (tokens[lookAheadIndex].type == 'var' ) {
     let varaibleName = match(tokens[lookAheadIndex].name);
-    match('=');
-    let exprResult = matchDigit();
+    if (tokens[lookAheadIndex].name == "+"){
+      match("+");
+      match("+");
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], true, [varaibleName, "++"]);
+
+    }else if(tokens[lookAheadIndex].name == "-"){
+      match("-");
+      match("-");
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], true, [varaibleName, "--"]);
+
+    }else{ //to do add += -= *= ....
+      match('=');
+      let exprResult = matchDigit();
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], true, [varaibleName, "=", exprResult]);
+
+    }
 
     //  let exprResult = expr();
-    match(';');
-    return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
 }
    else {
     throw 'expected identifier';
