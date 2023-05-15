@@ -44,24 +44,20 @@ function stmts() {
     tokens[lookAheadIndex].name == 'int' ||
     tokens[lookAheadIndex].name == 'char' ||
     tokens[lookAheadIndex].name == 'bool' 
-    //TODO add for, while, do, switch
     ) {
     let child = stmt();
     let children = stmts(); 
     return new Stament('stmts', [child, children], false, []);
   }
-  //return null;
 }
 /****************************************************************************/
 /* Name: stmt */
 /****************************************************************************/
 
-//stmt -> asmt | if_else | while_stmt
+//stmt -> asmt | if_else | while_stmt | do_while_stmt
 function stmt() {
   if (tokens[lookAheadIndex].name == 'if') {
     return if_stmt();
-   // return new Stament("if_stmt", [children], false, [condChild]);
-
   } else if (tokens[lookAheadIndex].name == 'while'){
     return while_stmt();
   }
@@ -80,16 +76,7 @@ function stmt() {
     throw 'expected statment';
   }
 }
-/*
-  if
-    ofdfodfo
-    djodgmjdogj
-    dgsjogsgog
-    end_stmt
-  elif
-  else
-  int omosmgf
-*/
+
 function if_stmt(){
   if (tokens[lookAheadIndex].name == 'if') {
     match('if');
@@ -118,7 +105,7 @@ function elseif(){
     let children = stmts();
     match('}');
     let elseIfChildren =elseif();
-    return new Stament("else_if_stmt", [children, endBlock , elseIfChildren ], false, [condChild]);
+    return new Stament("else_if_stmt", [children??emptyBloc, endBlock , elseIfChildren ], false, [condChild]);
   }
 }
 
@@ -128,7 +115,7 @@ function else_stmt(){
     match('{');
     let children = stmts();
     match('}');
-    return new Stament("else_stmt", [children, endBlock], false, []);
+    return new Stament("else_stmt", [children??emptyBloc, endBlock], false, []);
   }
 }
 
@@ -143,7 +130,7 @@ function while_stmt(){
     let children = stmts();
     match('}');
 
-    return new Stament("while_stmt", [children,endBlock], false, [condChild]);
+    return new Stament("while_stmt", [children??emptyBloc,endBlock], false, [condChild]);
   }else{
     throw 'expected while';
   }
@@ -163,7 +150,7 @@ function for_stmt(){
     let children = stmts();
     match('}');
 
-    return new Stament("for_stmt", [children,endBlock], false, [condChild,asgmtChild]);
+    return new Stament("for_stmt", [children??emptyBloc,endBlock], false, [condChild,asgmtChild]);
   }else{
     throw 'expected while';
   }
@@ -199,15 +186,12 @@ function asgmt() {
     dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
-    //let exprResult = expr();
     let exprResult = matchDigit();
-
+   //  let exprResult = expr();
     match(';');
     return new Stament("asgmt", [], true, [varaibleName, "=", exprResult]);
-    //expr();
 
   }else if (tokens[lookAheadIndex].type == 'var' ) {
-    //dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
     let exprResult = matchDigit();
@@ -215,8 +199,6 @@ function asgmt() {
     //  let exprResult = expr();
     match(';');
     return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
-    //expr();
-
 }
    else {
     throw 'expected identifier';
@@ -263,7 +245,6 @@ function match(token) {
 }
 
 function matchRelop(token) {
-  //console.log(token);
   if (token == '==' || token == '>=' || token == '<='
       || token == '!=' || token == '<' || token == '>') {
       lookAheadIndex++;

@@ -24,9 +24,6 @@ function translate() {
     block = translateStmt(node, block)
     
     if (block != ""){
-      //console.log(block);
-      
-      //block = indentation + block  + '\n';
       block += '\n';
       block = indentation + block ;
      }
@@ -34,7 +31,6 @@ function translate() {
     node.children.forEach((element) => {
       parsedStmt = traverse(element) ;
       block += parsedStmt ;
-      //console.log(j);
       
     });
   
@@ -72,60 +68,33 @@ function translate() {
       case 'if_stmt':
         result = 'if ';
         result += traverseConds(stmt.extra[0], "");      
-        /*console.log(stmt.extra[0]);
-        stmt.extra[0].children.forEach(condNode => {
-          condNode.children.forEach((element) => {
-            result += element + ' ';
-            result += condNode.extra[0]??"";
-          });
-          
-        });*/
-         
         result += ' :';
-        //block= '\t' + block;
-        
-        //result = result + '\n' ;
-        //result = result.replaceAll('\n', '\n\t');
         indentCount ++ ;
         return  result ;
   
       case 'else_if_stmt':
           result = 'elif ';
-          /*stmt.extra[0].children.forEach((element) => {
-            result += element + ' ';
-          });*/
           result += traverseConds(stmt.extra[0], "");      
           result += ' :';
-          //block= '\t' + block;
-          //result = result + '\n';
-          //console.log(block);
-          //result = result.replaceAll('\n', '\n\t');
           indentCount++;
           return  result;
       
       case 'else_stmt':
             result = 'else :';
-          
             block= '\t' + block;
-            //result = result + '\t\n' + block;
-            //console.log(block);
             result = result.replaceAll('\n', '\n\t');
             indentCount ++ ;
             return  result;
       
       case 'main_stmt':
           result = 'if __name__ == "__main__":';
-          //result = result + '\n' + block ;
-          //result = result.replaceAll('\n', '\n\t');
           indentCount ++;
-          return  result; //+ "\n";
+          return  result; 
       case 'asgmt':
           stmt.extra.forEach((element) => {
             result += element + ' ' ;
           });
-          //result = result+ '\n' + block;
-          //result = result.replaceAll('\n', '\n\t');
-          return result ;//+ "\n";
+          return result ;
        
       case 'while_stmt':
           result = 'while ';
@@ -146,10 +115,8 @@ function translate() {
   
       case 'end_block':
            indentCount -- ;
-          // console.log(indentCount);
            return "";
       default:
         return "";
-        break;
     }
   }
