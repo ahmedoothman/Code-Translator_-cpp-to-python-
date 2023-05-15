@@ -197,15 +197,40 @@ function asgmt(passSemiColumn = false) {
     let varaibleName = match(tokens[lookAheadIndex].name);
     if (tokens[lookAheadIndex].name == "+"){
       match("+");
-      match("+");
-      passSemiColumn? null :match(';');
-      return new Stament("asgmt", [], true, [varaibleName, "++"]);
+      if(tokens[lookAheadIndex].name == "="){
+        match("=");
+        let exprResult = matchDigit();
+        
+        passSemiColumn? null :match(';');
+        return new Stament("asgmt", [], true, [varaibleName, "+=", exprResult]);
+      }else if(tokens[lookAheadIndex].name == "+"){
+        match("+");
+        passSemiColumn? null :match(';');
+        return new Stament("asgmt", [], true, [varaibleName, "++"]);
+      }
+      
+      
 
     }else if(tokens[lookAheadIndex].name == "-"){
       match("-");
-      match("-");
+      if(tokens[lookAheadIndex].name == "="){
+        match("=");
+        let exprResult = matchDigit();
+        passSemiColumn? null :match(';');
+        return new Stament("asgmt", [], true, [varaibleName, "-=", exprResult]);
+      }else if(tokens[lookAheadIndex].name == "-"){
+          match("-");
+          passSemiColumn? null :match(';');
+          return new Stament("asgmt", [], true, [varaibleName, "--"]);
+      }
+      
+
+    }else if(tokens[lookAheadIndex].name == "*"){
+      match("*");
+      match("=");
+      let exprResult = matchDigit();
       passSemiColumn? null :match(';');
-      return new Stament("asgmt", [], true, [varaibleName, "--"]);
+      return new Stament("asgmt", [], true, [varaibleName, "*=", exprResult]);
 
     }else{ //to do add += -= *= ....
       match('=');
