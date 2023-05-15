@@ -67,6 +67,9 @@ function stmt() {
   else if(tokens[lookAheadIndex].name == 'do'){
     return do_while_stmt();
   }
+  else if(tokens[lookAheadIndex].name == 'switch'){
+    return switch_case_stmt();
+  }
   else if (tokens[lookAheadIndex].type == 'var' || 
       tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
       || tokens[lookAheadIndex].name == 'bool') {
@@ -156,6 +159,21 @@ function for_stmt(){
   }
 }
 
+/**
+  let varName  
+ switch(x){
+    case 0 :
+      stmts
+    break ;
+
+    case 1: 
+    break ;
+
+    default;
+    break ;
+ }
+ */
+
 
 function do_while_stmt(){
   if (tokens[lookAheadIndex].name == 'do') {
@@ -178,6 +196,91 @@ function _generate_trailing_if(condChild){
   return new Stament("if_stmt", [new Stament('asgmt', [], false, ["break;"]),
       endBlock], false, [condChild, true]);
 }
+
+// switch_stmt-> switch headnig { switch_stmts}
+// switch_stmts -> switch_stmt switch_stmts | e
+
+// switch_stmt -> case num : stmtm
+function switch_case_stmt(){
+  if (tokens[lookAheadIndex].name == 'switch') {
+    match('switch');
+    match('(');
+    let varName  = '';
+    if (tokens[lookAheadIndex].type == 'var'){
+      varName = tokens[lookAheadIndex].name;
+      match(tokens[lookAheadIndex].name);
+    }else{
+      throw "expected Variable after switch keyword";
+    }
+    match(')');
+    match('{');
+    let switchChildren = swtich_stmts(false, varName);    
+    match('}');
+    return new Stament("stmts", [switchChildren,], false, []);
+  }else{
+    throw 'expected switch';
+  }
+}
+
+/*function swtich_stmts(isElifChain = false, varName){
+  if (
+    tokens[lookAheadIndex].name == 'case' ||
+    tokens[lookAheadIndex].name == 'default' 
+   
+    ) {
+    let child = swtich_stmt();
+    let children = swtich_stmts(); 
+    if (isElifChain){
+      return new Stament("else_if_stmt", [child??emptyBloc, endBlock , children ], false, [_generate_cond_switch(varName, child.extra[0])]);
+    }
+    return new Stament("if_stmt", [child??emptyBloc,endBlock], 
+      false, [_generate_cond_switch(varName, child.extra[0])]);
+  }
+}*/
+
+function swtich_stmts(isElifChain = false, varName){
+  if (
+    tokens[lookAheadIndex].name == 'case' ||
+    tokens[lookAheadIndex].name == 'default' 
+   
+    ) {
+    let child = swtich_stmt(varName, isElifChain);
+    let children = swtich_stmts(varName, true); 
+    return new Stament("if_stmt", [child??emptyBloc,endBlock, children ,],
+           false, [_generate_cond_switch(varName, child.extra[0])]   );
+  }
+}
+
+function swtich_stmt(varName ,isElifChain = false){
+  if (tokens[lookAheadIndex].name == 'case') {
+    match('case');
+    let digit = matchDigit();
+    match(':');
+    let children = stmts();
+    match("break");
+    match(';');
+    children.extra[0] = digit ;
+    if (isElifChain){
+          return new Stament("else_if_stmt", [children??emptyBloc, endBlock], false, [_generate_cond_switch(varName, digit)] );
+    }
+   return children;
+  } else if (tokens[lookAheadIndex].name == 'default'){
+    match('default');
+   // matchDigit();
+    match(':');
+    let children = stmts();
+    match('break');
+    match(';');
+    return new Stament("else_stmt", [children??emptyBloc, endBlock], false, []);
+  } else {
+    throw 'expected statment inside switch case';
+  }
+}
+
+function _generate_cond_switch(varName, varValue){
+  return  new Stament("conds", [ new Stament("cond", [], true ,[varName, "==", varValue ] ,)], false, [""]) ;
+}
+
 
 /****************************************************************************/
 /* Name: asgmt */
@@ -273,7 +376,9 @@ function dataType() {
  * */
 /****************************************************************************/
 function match(token) {
-  //console.log(token);
+  console.log(token);
+  console.log( tokens[lookAheadIndex].name);
+  console.log("/////////////////////////");
   if (token == tokens[lookAheadIndex].name) {
     if (lookAheadIndex < tokens.length) {
       lookAheadIndex++;
