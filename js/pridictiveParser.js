@@ -238,7 +238,7 @@ function switch_case_stmt(){
   }
 }*/
 
-function swtich_stmts(isElifChain = false, varName){
+function swtich_stmts(varName , isElifChain = false){
   if (
     tokens[lookAheadIndex].name == 'case' ||
     tokens[lookAheadIndex].name == 'default' 
