@@ -214,7 +214,7 @@ function switch_case_stmt(){
     }
     match(')');
     match('{');
-    let switchChildren = swtich_stmts(false, varName);    
+    let switchChildren = swtich_stmts(varName, false);    
     match('}');
     return new Stament("stmts", [switchChildren,], false, []);
   }else{
@@ -238,20 +238,20 @@ function switch_case_stmt(){
   }
 }*/
 
-function swtich_stmts(varName , isElifChain = false){
+function swtich_stmts(varName , isElifChain){
   if (
     tokens[lookAheadIndex].name == 'case' ||
     tokens[lookAheadIndex].name == 'default' 
    
     ) {
     let child = swtich_stmt(varName, isElifChain);
-    let children = swtich_stmts(varName, true); 
-    return new Stament("if_stmt", [child??emptyBloc,endBlock, children ,],
-           false, [_generate_cond_switch(varName, child.extra[0])]   );
+    isElifChain = true;
+    let children = swtich_stmts(varName, isElifChain); 
+    return new Stament("if_stmt", [child??emptyBloc,endBlock, children ,],false, [_generate_cond_switch(varName, child.extra[0])]   );
   }
 }
 
-function swtich_stmt(varName ,isElifChain = false){
+function swtich_stmt(varName ,isElifChain){
   if (tokens[lookAheadIndex].name == 'case') {
     match('case');
     let digit = matchDigit();
@@ -266,7 +266,7 @@ function swtich_stmt(varName ,isElifChain = false){
    return children;
   } else if (tokens[lookAheadIndex].name == 'default'){
     match('default');
-   // matchDigit();
+   
     match(':');
     let children = stmts();
     match('break');
