@@ -50,11 +50,7 @@ function stmts() {
     return new Stament('stmts', [child, children], false, []);
   }
 }
-/****************************************************************************/
-/* Name: stmt */
-/****************************************************************************/
 
-//stmt -> asmt | if_else | while_stmt | do_while_stmt
 function stmt() {
   if (tokens[lookAheadIndex].name == 'if') {
     return if_stmt();
@@ -85,6 +81,9 @@ function if_stmt(){
     match('if');
     match('(');
     let condChild = conds();
+    if (condChild == null){
+      throw "expected condition inside if";
+    }
     match(')');         
     match('{');
     let children = stmts();
@@ -103,6 +102,9 @@ function elseif(){
     match('else if');
     match('(');
     let condChild = conds();
+    if (condChild == null){
+      throw "expected condition inside else if";
+    }
     match(')');
     match('{');
     let children = stmts();
@@ -128,6 +130,9 @@ function while_stmt(){
     match('while');
     match('(');
     let condChild = conds();
+    if (condChild == null){
+      throw "expected condition inside while";
+    }
     match(')');         
     match('{');
     let children = stmts();
@@ -159,20 +164,6 @@ function for_stmt(){
   }
 }
 
-/**
-  let varName  
- switch(x){
-    case 0 :
-      stmts
-    break ;
-
-    case 1: 
-    break ;
-
-    default;
-    break ;
- }
- */
 
 
 function do_while_stmt(){
@@ -184,6 +175,9 @@ function do_while_stmt(){
     match('while');
     match('(');
     let condChild = conds();
+    if (condChild == null){
+      throw "expected condition inside do while";
+    }
     match(')');         
     match(';');
     return new Stament("do_while_stmt", [children, _generate_trailing_if(condChild),endBlock], false, []);
@@ -222,22 +216,6 @@ function switch_case_stmt(){
   }
 }
 
-/*function swtich_stmts(isElifChain = false, varName){
-  if (
-    tokens[lookAheadIndex].name == 'case' ||
-    tokens[lookAheadIndex].name == 'default' 
-   
-    ) {
-    let child = swtich_stmt();
-    let children = swtich_stmts(); 
-    if (isElifChain){
-      return new Stament("else_if_stmt", [child??emptyBloc, endBlock , children ], false, [_generate_cond_switch(varName, child.extra[0])]);
-    }
-    return new Stament("if_stmt", [child??emptyBloc,endBlock], 
-      false, [_generate_cond_switch(varName, child.extra[0])]);
-  }
-}*/
-
 function swtich_stmts(varName , isElifChain){
   if (
     tokens[lookAheadIndex].name == 'case' ||
@@ -245,9 +223,9 @@ function swtich_stmts(varName , isElifChain){
    
     ) {
     let child = swtich_stmt(varName, isElifChain);
-    isElifChain = true;
-    let children = swtich_stmts(varName, isElifChain); 
-    return new Stament("if_stmt", [child??emptyBloc,endBlock, children ,],false, [_generate_cond_switch(varName, child.extra[0])]   );
+    let children = swtich_stmts(varName, true); 
+    
+    return new Stament('stmts', [child, children], false, []);
   }
 }
 
@@ -259,12 +237,12 @@ function swtich_stmt(varName ,isElifChain){
     let children = stmts();
     match("break");
     match(';');
-    children.extra[0] = digit ;
     if (isElifChain){
-          return new Stament("else_if_stmt", [children??emptyBloc, endBlock], false, [_generate_cond_switch(varName, digit)] );
+        return new Stament("else_if_stmt", [children??emptyBloc, endBlock], false, [_generate_cond_switch(varName, digit)] );
+    }else{
+        return new Stament("if_stmt", [children??emptyBloc,endBlock],false, [_generate_cond_switch(varName, digit)]   );
     }
-   return children;
-  } else if (tokens[lookAheadIndex].name == 'default'){
+  }else if (tokens[lookAheadIndex].name == 'default'){
     match('default');
    
     match(':');
@@ -376,9 +354,8 @@ function dataType() {
  * */
 /****************************************************************************/
 function match(token) {
-  console.log(token);
-  console.log( tokens[lookAheadIndex].name);
-  console.log("/////////////////////////");
+  //console.log(token);
+  //console.log( tokens[lookAheadIndex].name);
   if (token == tokens[lookAheadIndex].name) {
     if (lookAheadIndex < tokens.length) {
       lookAheadIndex++;

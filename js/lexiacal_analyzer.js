@@ -12,7 +12,7 @@ function tokenize() {
     //theCode = theCode.replace(/\s+/g, '');
     const words = theCode.match(regExpPattern);
     words.forEach((lexem) => {
-      console.log(lexem);
+      //console.log(lexem);
       if (constants.includes(lexem) || brackets.includes(lexem)) {
         tokens.push(new Token(lexem, 'const'));
       } else {
