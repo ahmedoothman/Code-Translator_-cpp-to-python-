@@ -10,6 +10,7 @@ const constants = [
   '\\{',
   'else if',
   'else',
+  'do',
   'return',
   '\\true',
   '\\false',
