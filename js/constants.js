@@ -14,6 +14,7 @@ const constants = [
   '\\true',
   '\\false',
   'for',
+  'while',
   '\\|\\|',
   '\\&\\&',
 
