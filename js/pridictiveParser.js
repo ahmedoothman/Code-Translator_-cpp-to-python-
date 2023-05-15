@@ -95,7 +95,7 @@ function if_stmt(){
     let elseIfChildren =elseif();
     let elseChildren = else_stmt();
 
-    return new Stament("if_stmt", [children,endBlock, elseIfChildren, elseChildren ,], false, [condChild]);
+    return new Stament("if_stmt", [children??emptyBloc,endBlock, elseIfChildren, elseChildren ,], false, [condChild]);
   }else{
     throw 'expected if';
   }
@@ -171,16 +171,20 @@ function asgmt() {
     dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
-    let expr = expr();
+    //let exprResult = expr();
+    let exprResult = matchDigit();
+
     match(';');
-    return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
+    return new Stament("asgmt", [], true, [varaibleName, "=", exprResult]);
     //expr();
 
   }else if (tokens[lookAheadIndex].type == 'var' ) {
     //dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
-    let expr = expr();
+    let exprResult = matchDigit();
+
+    //  let exprResult = expr();
     match(';');
     return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
     //expr();
@@ -492,6 +496,7 @@ class Stament {
   }
 }
 const endBlock = new Stament('end_block', [], false, []);
+const emptyBloc = new Stament('asgmt', [], false, ["continue"]);
 
 
 function expr (){
