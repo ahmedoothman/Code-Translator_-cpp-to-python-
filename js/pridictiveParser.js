@@ -3,6 +3,8 @@
 /* Name: main_stmt */
 /****************************************************************************/
 let indentCount = 0;
+let lookAheadIndex = 0;
+let parseTree;
 
 function main_stmt() {
   try {
@@ -36,33 +38,34 @@ function stmts() {
     tokens[lookAheadIndex].name == 'while' ||
     tokens[lookAheadIndex].name == 'for' ||
     tokens[lookAheadIndex].name == 'switch' ||
+    tokens[lookAheadIndex].name == 'do' ||
+
     tokens[lookAheadIndex].type == 'var' ||
     tokens[lookAheadIndex].name == 'int' ||
     tokens[lookAheadIndex].name == 'char' ||
     tokens[lookAheadIndex].name == 'bool' 
-    //TODO add for, while, do, switch
     ) {
     let child = stmt();
     let children = stmts(); 
     return new Stament('stmts', [child, children], false, []);
   }
-  //return null;
 }
 /****************************************************************************/
 /* Name: stmt */
 /****************************************************************************/
 
-//stmt -> asmt | if_else | while_stmt
+//stmt -> asmt | if_else | while_stmt | do_while_stmt
 function stmt() {
   if (tokens[lookAheadIndex].name == 'if') {
     return if_stmt();
-   // return new Stament("if_stmt", [children], false, [condChild]);
-
   } else if (tokens[lookAheadIndex].name == 'while'){
     return while_stmt();
   }
   else if(tokens[lookAheadIndex].name == 'for'){
     return for_stmt();
+  }
+  else if(tokens[lookAheadIndex].name == 'do'){
+    return do_while_stmt();
   }
   else if (tokens[lookAheadIndex].type == 'var' || 
       tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
@@ -73,16 +76,7 @@ function stmt() {
     throw 'expected statment';
   }
 }
-/*
-  if
-    ofdfodfo
-    djodgmjdogj
-    dgsjogsgog
-    end_stmt
-  elif
-  else
-  int omosmgf
-*/
+
 function if_stmt(){
   if (tokens[lookAheadIndex].name == 'if') {
     match('if');
@@ -95,7 +89,7 @@ function if_stmt(){
     let elseIfChildren =elseif();
     let elseChildren = else_stmt();
 
-    return new Stament("if_stmt", [children,endBlock, elseIfChildren, elseChildren ,], false, [condChild]);
+    return new Stament("if_stmt", [children??emptyBloc,endBlock, elseIfChildren, elseChildren ,], false, [condChild]);
   }else{
     throw 'expected if';
   }
@@ -111,7 +105,7 @@ function elseif(){
     let children = stmts();
     match('}');
     let elseIfChildren =elseif();
-    return new Stament("else_if_stmt", [children, endBlock , elseIfChildren ], false, [condChild]);
+    return new Stament("else_if_stmt", [children??emptyBloc, endBlock , elseIfChildren ], false, [condChild]);
   }
 }
 
@@ -121,7 +115,7 @@ function else_stmt(){
     match('{');
     let children = stmts();
     match('}');
-    return new Stament("else_stmt", [children, endBlock], false, []);
+    return new Stament("else_stmt", [children??emptyBloc, endBlock], false, []);
   }
 }
 
@@ -136,7 +130,7 @@ function while_stmt(){
     let children = stmts();
     match('}');
 
-    return new Stament("while_stmt", [children,endBlock], false, [condChild]);
+    return new Stament("while_stmt", [children??emptyBloc,endBlock], false, [condChild]);
   }else{
     throw 'expected while';
   }
@@ -150,41 +144,78 @@ function for_stmt(){
     let asgmtChild = asgmt();
     let condChild = conds();
     match(';');
-    let stepChild = asgmt();
+    let stepChild = asgmt(true);
     match(')');         
     match('{');
     let children = stmts();
     match('}');
 
-    return new Stament("for_stmt", [children,endBlock], false, [condChild,asgmtChild]);
+    return new Stament("for_stmt", [children??emptyBloc,endBlock], false, [condChild,asgmtChild]);
   }else{
     throw 'expected while';
   }
 }
 
+
+function do_while_stmt(){
+  if (tokens[lookAheadIndex].name == 'do') {
+    match('do');
+    match('{');
+    let children = stmts();
+    match('}');
+    match('while');
+    match('(');
+    let condChild = conds();
+    match(')');         
+    match(';');
+    return new Stament("do_while_stmt", [children, _generate_trailing_if(condChild),endBlock], false, []);
+  }else{
+    throw 'expected while';
+  }
+}
+
+function _generate_trailing_if(condChild){
+  return new Stament("if_stmt", [new Stament('asgmt', [], false, ["break;"]),
+      endBlock], false, [condChild, true]);
+}
+
 /****************************************************************************/
 /* Name: asgmt */
 /****************************************************************************/
-function asgmt() {
+function asgmt(passSemiColumn = false) {
   if (tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
      || tokens[lookAheadIndex].name == 'bool') {
     dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
     match('=');
-    let expr = expr();
-    match(';');
-    return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
-    //expr();
+    let exprResult = matchDigit();
+   //  let exprResult = expr();
+   passSemiColumn? null :match(';');
+    return new Stament("asgmt", [], true, [varaibleName, "=", exprResult]);
 
   }else if (tokens[lookAheadIndex].type == 'var' ) {
-    //dataType();
     let varaibleName = match(tokens[lookAheadIndex].name);
-    match('=');
-    let expr = expr();
-    match(';');
-    return new Stament("asgmt", [], true, [varaibleName, "=", expr]);
-    //expr();
+    if (tokens[lookAheadIndex].name == "+"){
+      match("+");
+      match("+");
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], true, [varaibleName, "++"]);
 
+    }else if(tokens[lookAheadIndex].name == "-"){
+      match("-");
+      match("-");
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], true, [varaibleName, "--"]);
+
+    }else{ //to do add += -= *= ....
+      match('=');
+      let exprResult = matchDigit();
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], true, [varaibleName, "=", exprResult]);
+
+    }
+
+    //  let exprResult = expr();
 }
    else {
     throw 'expected identifier';
@@ -231,7 +262,6 @@ function match(token) {
 }
 
 function matchRelop(token) {
-  //console.log(token);
   if (token == '==' || token == '>=' || token == '<='
       || token == '!=' || token == '<' || token == '>') {
       lookAheadIndex++;
@@ -289,8 +319,6 @@ function conds(){
 
 
 function cond(){
-  console.log(tokens[lookAheadIndex]);
-
   if (tokens[lookAheadIndex].type == 'var') {
     let id = match(tokens[lookAheadIndex].name);
     let relop =matchRelop(tokens[lookAheadIndex].name);
@@ -308,161 +336,7 @@ function cond(){
 
 
 
-/****************************************************************************/
-/****************************************************************************/
-function translate() {
-  let code = translateStmt(parseTree, '');
-  code +="\n";
-  parseTree.children.forEach((element) => {
-    code += traverse(element);
-  });
-  return code;
-}
-/****************************************************************************/
-/* Name: traverse */
-/* input: node */
-/****************************************************************************/
-function traverse(node) {
-  if (node == null) {
-    return '';
-  }
-  let block = '';
-  let indentation = "";
-    for(var i=0 ; i <indentCount ; i++){
-      indentation += "   ";
-  }
-  block = translateStmt(node, block)
-  
-  if (block != ""){
-    //console.log(block);
-    
-    //block = indentation + block  + '\n';
-    block += '\n';
-    block = indentation + block ;
-   }
 
-  node.children.forEach((element) => {
-    parsedStmt = traverse(element) ;
-    block += parsedStmt ;
-    //console.log(j);
-    
-  });
-
-  return block;
-}
-
-function traverseConds(node,  opreator){
-  if (node == null) {
-    return '';
-  }
-  if (node.stmt_type == "conds"){
-    let conditonStatment = "";
-    node.children.forEach((element) => {
-      conditonStatment += traverseConds(element, node.extra[0]) ;      
-    });
-    return conditonStatment;
-  }else{
-    let parsedStatment = " ";
-    node.extra.forEach(element => {
-      parsedStatment += element + " ";
-    });
-    parsedStatment += " "+ opreator + " ";
-    return parsedStatment ;
-  }
-}
-
-
-/****************************************************************************/
-/* Name: translateStmt */
-/* input: stmt , block */
-/****************************************************************************/
-function translateStmt(stmt, block) {
-  let result = "";
-  switch (stmt.stmt_type) {
-    case 'if_stmt':
-      result = 'if ';
-      result += traverseConds(stmt.extra[0], "");      
-      /*console.log(stmt.extra[0]);
-      stmt.extra[0].children.forEach(condNode => {
-        condNode.children.forEach((element) => {
-          result += element + ' ';
-          result += condNode.extra[0]??"";
-        });
-        
-      });*/
-       
-      result += ' :';
-      //block= '\t' + block;
-      
-      //result = result + '\n' ;
-      //result = result.replaceAll('\n', '\n\t');
-      indentCount ++ ;
-      return  result ;
-
-    case 'else_if_stmt':
-        result = 'elif ';
-        /*stmt.extra[0].children.forEach((element) => {
-          result += element + ' ';
-        });*/
-        result += traverseConds(stmt.extra[0], "");      
-        result += ' :';
-        //block= '\t' + block;
-        //result = result + '\n';
-        //console.log(block);
-        //result = result.replaceAll('\n', '\n\t');
-        indentCount++;
-        return  result;
-    
-    case 'else_stmt':
-          result = 'else :';
-        
-          block= '\t' + block;
-          //result = result + '\t\n' + block;
-          //console.log(block);
-          result = result.replaceAll('\n', '\n\t');
-          indentCount ++ ;
-          return  result;
-    
-    case 'main_stmt':
-        result = 'if __name__ == "__main__":';
-        //result = result + '\n' + block ;
-        //result = result.replaceAll('\n', '\n\t');
-        indentCount ++;
-        return  result; //+ "\n";
-    case 'asgmt':
-        stmt.extra.forEach((element) => {
-          result += element + ' ' ;
-        });
-        //result = result+ '\n' + block;
-        //result = result.replaceAll('\n', '\n\t');
-        return result ;//+ "\n";
-     
-    case 'while_stmt':
-        result = 'while ';
-        result += traverseConds(stmt.extra[0], "");      
-        result += ' :';
-        indentCount ++ ;
-        return  result ;
-
-    case 'for_stmt':
-          result = 'for ';
-          result += stmt.extra[1].extra[0];  
-          result+= ' in range(';
-          result+=stmt.extra[0].children[0].extra[2];
-          result +=')'   
-          result += ' :';
-          indentCount ++ ;
-          return  result ;  
-
-    case 'end_block':
-         indentCount -- ;
-        // console.log(indentCount);
-         return "";
-    default:
-      return "";
-      break;
-  }
-}
 /****************************************************************************/
 /* Name: isNumeric */
 /* input: value */
@@ -492,6 +366,8 @@ class Stament {
   }
 }
 const endBlock = new Stament('end_block', [], false, []);
+
+const emptyBloc = new Stament('asgmt', [], false, ["pass"]);
 
 
 function expr (){
