@@ -3,7 +3,7 @@ int main(){
     int y = 0;
     while (x>0)
     {
-        x =x-1;
+        x --;
         if (x == 4){
             x += 4;
         }else if(x == 9 || x >= 2  && true){
