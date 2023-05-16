@@ -290,7 +290,7 @@ function asgmt(passSemiColumn = false) {
       }else if(tokens[lookAheadIndex].name == "+"){
         match("+");
         passSemiColumn? null :match(';');
-        return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " +1"]);
+        return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " + 1"]);
       }
       
       
@@ -306,7 +306,7 @@ function asgmt(passSemiColumn = false) {
       }else if(tokens[lookAheadIndex].name == "-"){
           match("-");
           passSemiColumn? null :match(';');
-          return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " -1"]);
+          return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " - 1"]);
       }
       
 
