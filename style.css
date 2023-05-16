@@ -169,11 +169,11 @@ textarea:focus {
     flex-direction: column;
   }
   .input {
-    width: 90%;
+    width: 95%;
     padding: 10px;
   }
   .output {
-    width: 90%;
+    width: 95%;
     padding: 10px;
   }
   .CodeMirror {
