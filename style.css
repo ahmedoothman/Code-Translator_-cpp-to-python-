@@ -157,15 +157,29 @@ textarea:focus {
 
 /* mediascreen */
 @media screen and (max-width: 768px) {
+  section {
+    width: 90%;
+    padding: 20px 0px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
   .code {
     flex-direction: column;
   }
-  .output {
-    width: 100%;
+  .input {
+    width: 90%;
     padding: 10px;
   }
-  .input {
-    width: 100%;
+  .output {
+    width: 90%;
     padding: 10px;
+  }
+  .CodeMirror {
+    height: 350px;
+    padding: 10px 0px;
+    font-size: 15px;
+    border-radius: 10px;
   }
 }
