@@ -1,47 +1,55 @@
-int main() {
-    int ziad = 4;
+int main()
+{
+    int var = 4;
     int x = 6;
     int y = 0;
     int j = 0;
     int b = 0;
     int z = 0;
     int jj = 0;
- 	if (x < 8 || x> 4 
-        || true  || false  &&
-        ziad > 4 && ziad  < 4 
-        ){
-        
+ 	if (var < 8 || var > 4 || true  || false  && x >= 4 && x  <= 4){
+
     }else if (true && false){
         for (int i =0 ; i <8; i ++){
             while(x < 4){
                 int x = 44 ;
-                x = 8;
+                x ++ ;
+                x -- ;
             }
-            y = 4;
+            y *= 4;
+            y /= 4 ;
+        }
+        while(false){
+
         }
     }else if (x >= 4 && x <= 4 && x!= 4){
         do{
-            j = 8;
+            int j = 8;
             if (x<4){
-                int j = 4 ;
+                j = 4 ;
             }
-            b= 4;
-            
+            int b= 4;
+
         }while(z < 8);
+        do {
+
+        }while(false);
+
     }else{
-        switch(jj){
+        int abcde =1;
+        switch(abcde){
             case 0 :
-                int q = 4 ;
+                abcde  = 12 ;
                 break ;
-            case 1 : 
-                int j = 1;
+            case 1 :
+                abcde  = 4 ;
               break;
             default:
                 int y=4;
              break ;
         }
     }
-    
-    
+
+
     return 8 ;
 }

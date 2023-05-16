@@ -309,7 +309,7 @@ function asgmt(passSemiColumn = false) {
           return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " - 1"]);
       }
       
-
+      match("=");
     }else if(tokens[lookAheadIndex].name == "*"){
       match("*");
       match("=");
@@ -318,18 +318,22 @@ function asgmt(passSemiColumn = false) {
       passSemiColumn? null :match(';');
       return new Stament("asgmt", [], [varaibleName, "*=", exprResult]);
 
-    }else{ //to do add += -= *= ....
+    }else if(tokens[lookAheadIndex].name == "/"){
+      match("/");
+      match("=");
+      let exprResult = expr();
+      passSemiColumn? null :match(';');
+      return new Stament("asgmt", [], [varaibleName, "/=", exprResult]);
+
+    }else{
       match('=');
-        //let exprResult = matchDigit();
         let exprResult = expr();
       passSemiColumn? null :match(';');
       return new Stament("asgmt", [], [varaibleName, "=", exprResult]);
 
     }
 
-    //  let exprResult = expr();
-}
-   else {
+  }else {
     throw 'expected identifier';
   }
 }

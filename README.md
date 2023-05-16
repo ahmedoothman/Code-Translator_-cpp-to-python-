@@ -7,6 +7,8 @@
     
 -   Detect relations between complex statements (e.g. for statement inside while statement inside if statement,.etc )
     
+-   can remove single line and multiple line comments
+
 -   Detect relations between compound conditions (e.g. A&&B || C)
     
 -   Responsive and user-friendly UI
@@ -56,6 +58,10 @@ logicOpr -> && | || | e
 
 Cond -> id relop digit
 
-Digit -> 0|...|9
-
-Id -> a|...|z|A|....|Z
+expr → term rest
+rest → + term rest | - term rest | ɛ
+term → factor rest1
+rest1 → * factor rest1 | / factor rest1 | ɛ
+factor → digit | (expr)
+id -> a|..|z|A|..|Z
+digit → 0 | 1 | ... | 9

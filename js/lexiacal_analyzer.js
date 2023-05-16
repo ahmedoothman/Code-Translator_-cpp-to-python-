@@ -8,6 +8,10 @@ function tokenize() {
     const regExpPattern = new RegExp(regExpPatternString, 'g');
   
     theCode = theCode.replace(/ \/\/.*$ /, '');
+
+    const commentsPattern = /\/\/.*|\/\*[\s\S]*?\*\//g;
+    theCode = theCode.replace(commentsPattern, '');
+
     theCode = theCode.replace('\n', '');
     //theCode = theCode.replace(/\s+/g, '');
     const words = theCode.match(regExpPattern);
