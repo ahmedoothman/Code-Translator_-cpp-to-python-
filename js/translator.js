@@ -52,11 +52,13 @@ function translate() {
       node.extra.forEach(element => {
         parsedStatment += element + " ";
       });
-      parsedStatment += " "+ opreator + " ";
+      parsedStatment += " "+ opreator ;
       return parsedStatment ;
     }
   }
+
   
+
   
   /****************************************************************************/
   /* Name: translateStmt */

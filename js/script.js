@@ -63,10 +63,11 @@ const translateHandler = () => {
   /* logic implementation */
   tokens = [];
   lookAheadIndex = 0;
+  indentCount = 0;
+  parseTree = null ;
   tokenize();
   try {
     main_stmt();
-   // translate();
     outputCode =  translate();
   } catch (e) {
     console.log(e);
