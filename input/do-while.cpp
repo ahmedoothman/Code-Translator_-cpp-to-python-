@@ -1,7 +1,7 @@
 int main(){
     int x = 6;
     do{
-        x ++;
+        x++;
         if (x == 4){
             x += 4;
         }else if(x == 9 || x >= 2  && true){

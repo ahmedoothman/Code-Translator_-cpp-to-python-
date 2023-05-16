@@ -1,5 +1,11 @@
 int main() {
-    
+    int ziad = 4;
+    int x = 6;
+    int y = 0;
+    int j = 0;
+    int b = 0;
+    int z = 0;
+    int jj = 0;
  	if (x < 8 || x> 4 
         || true  || false  &&
         ziad > 4 && ziad  < 4 
