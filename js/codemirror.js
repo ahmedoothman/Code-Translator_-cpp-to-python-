@@ -6,11 +6,17 @@ const inputEditor = CodeMirror.fromTextArea(inputBox, {
   matchBrackets: true,
   autoCloseBrackets: true,
   style: 'border-radius: 10px;',
+  keyMap: 'emacs',
 });
 const outputEditor = CodeMirror.fromTextArea(outputBox, {
-  mode: 'text/x-python',
+  mode: {
+    name: 'python',
+    version: 3,
+    singleLineStringErrors: false,
+    highlightFormatting: false,
+  },
   lineNumbers: true,
-  indentUnit: 4,
+  indentUnit: 1,
   theme: 'material-darker',
   matchBrackets: true,
   autoCloseBrackets: true,
