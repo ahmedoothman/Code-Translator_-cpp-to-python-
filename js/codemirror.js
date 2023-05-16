@@ -6,7 +6,6 @@ const inputEditor = CodeMirror.fromTextArea(inputBox, {
   matchBrackets: true,
   autoCloseBrackets: true,
   style: 'border-radius: 10px;',
-  keyMap: 'emacs',
 });
 const outputEditor = CodeMirror.fromTextArea(outputBox, {
   mode: {
