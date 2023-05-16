@@ -108,9 +108,9 @@ section {
 .code {
   width: 100%;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-evenly;
 }
-
 .output {
   width: 45%;
   padding: 10px;
@@ -153,4 +153,19 @@ textarea:focus {
 }
 .output-header h1 {
   margin-right: 20px;
+}
+
+/* mediascreen */
+@media screen and (max-width: 768px) {
+  .code {
+    flex-direction: column;
+  }
+  .output {
+    width: 100%;
+    padding: 10px;
+  }
+  .input {
+    width: 100%;
+    padding: 10px;
+  }
 }
