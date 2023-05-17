@@ -157,6 +157,14 @@ textarea:focus {
 
 /* mediascreen */
 @media screen and (max-width: 768px) {
+  .headerActions {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin-top: 20px;
+  }
   section {
     width: 90%;
     padding: 20px 0px;
@@ -165,6 +173,7 @@ textarea:focus {
     justify-content: center;
     align-items: center;
   }
+
   .code {
     flex-direction: column;
   }
