@@ -6,7 +6,7 @@ const outputBox = document.getElementById('output-box');
 const downloadBtn = document.getElementById('download-btn');
 let theCode;
 let outputCode;
-
+let fileNameSave;
 /****************************************************************************/
 /* Name : handle input file */
 /* Desc : take the input file and get ad string */
@@ -14,6 +14,7 @@ let outputCode;
 function handleFile(event) {
   const file = event.target.files[0];
   fileInputName.innerHTML = file.name;
+  fileNameSave = file.name.replace('.cpp', '');
   const reader = new FileReader();
   reader.onload = function (e) {
     const fileContent = e.target.result;
@@ -33,7 +34,7 @@ const downloadHandler = () => {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   const currentDate = new Date().getTime();
-  const fileName = `output-python-${currentDate}.py`;
+  const fileName = `${fileNameSave}-python-${currentDate / 10000}.py`;
   link.download = fileName;
   link.href = url;
   document.body.appendChild(link);
@@ -64,11 +65,11 @@ const translateHandler = () => {
   tokens = [];
   lookAheadIndex = 0;
   indentCount = 0;
-  parseTree = null ;
+  parseTree = null;
   tokenize();
   try {
     main_stmt();
-    outputCode =  translate();
+    outputCode = translate();
   } catch (e) {
     console.log(e);
     outputCode = e;
@@ -88,4 +89,3 @@ convertCode.addEventListener('click', translateHandler);
  * tokenize the constants and varibles in list tokens
  */
 /****************************************************************************/
-
