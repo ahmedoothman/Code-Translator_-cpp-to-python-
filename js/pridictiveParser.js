@@ -39,6 +39,10 @@ function stmts() {
     tokens[lookAheadIndex].name == 'while' ||
     tokens[lookAheadIndex].name == 'for' ||
     tokens[lookAheadIndex].name == 'switch' ||
+    tokens[lookAheadIndex].name == 'printf' ||
+    tokens[lookAheadIndex].name == 'cout' ||
+    tokens[lookAheadIndex].name == 'cin' ||
+
     tokens[lookAheadIndex].name == 'do' ||
     tokens[lookAheadIndex].type == 'var' ||
     tokens[lookAheadIndex].name == 'int' ||
@@ -62,7 +66,16 @@ function stmt() {
     return do_while_stmt();
   } else if (tokens[lookAheadIndex].name == 'switch') {
     return switch_case_stmt();
-  } else if (
+  } else if (tokens[lookAheadIndex].name == 'printf') {
+    return printfstmt();
+  }else if (tokens[lookAheadIndex].name == 'cout') {
+    return coutStmt();
+  }
+  else if (tokens[lookAheadIndex].name == 'cin') {
+    return cinStmt();
+  }
+  
+   else if (
     tokens[lookAheadIndex].type == 'var' ||
     tokens[lookAheadIndex].name == 'int' ||
     tokens[lookAheadIndex].name == 'char' ||
@@ -370,6 +383,142 @@ function asgmt(passSemiColumn = false) {
   }
 }
 
+// printf_stmt -> printf(prints)
+// prints -> print ,prints| print | e
+//print -> "" | expr
+function printfstmt() {
+  if (  tokens[lookAheadIndex].name == 'printf' ) {
+    match('printf');
+    match('(');
+    if (tokens[lookAheadIndex].name[0] == '"'){
+      const placeHolderPattern = /%[\s\S]/g;
+      let placeHolders = tokens[lookAheadIndex].name.match(placeHolderPattern);
+      let printResult = tokens[lookAheadIndex].name ;
+      let closingBracketsCount = 0 ;
+      lookAheadIndex++ ;
+      if (tokens[lookAheadIndex].name == ')'){
+        match(")");
+        match(";");
+        return new Stament('printf_stmt', [], ["print(", printResult, ")"]);
+      }
+      match(",");
+
+      let res = getNextToken();
+      if (res == "("){
+        closingBracketsCount ++
+      }else if (res == ")"){
+        match(';');
+      }else if (res == ","){
+        throw "expected expression or identifier";
+      }
+      while( (res != ')' || closingBracketsCount >= 0) && res != ';'){
+      
+       if (res == ';'){
+        break ;
+      }else if (res == '('){
+        closingBracketsCount ++ ;
+      }else if (res == ')' && closingBracketsCount == 0){
+        lookAheadIndex -- ;
+        break ;
+      }else if (res == ')' && closingBracketsCount > 0){
+        closingBracketsCount --
+      }else if (res == ')' && closingBracketsCount < 0){
+        throw 'expected ) at the end of printf';
+      }
+      if (res != ","){
+        printResult = printResult.replace(/%[\s\S]/, '$'+ res.replaceAll('"', '')+ ''); 
+        console.log(printResult);
+      }
+        res = getNextToken();
+      }
+      match(')');
+      match(';');
+   return new Stament('printf_stmt', [], ["print(", printResult, ")"]);
+  } else {
+    throw 'printf should starts with a string';
+  }
+}
+}
+
+function coutStmt() {
+  let printResult = "" ;
+  if (  tokens[lookAheadIndex].name == 'cout' ) { 
+    match('cout');   
+    do{
+      match('<<');
+      result = getNextToken();
+      if (result == ";" || result == "<<"  || result == ">>"){
+        throw "expected string or an identifier after cout";
+      }
+      
+      printResult += result + " +" ;
+      if (tokens[lookAheadIndex].name == ';'){
+        match(';');
+        break;
+      }
+    }while(result != ";" && result != "<<"  && result != ">>")
+    printResult = printResult.slice(0, -1);
+   return new Stament('printf_stmt', [], ["print(", printResult, ")"]);
+  } else {
+    throw 'expected cout';
+  }
+}
+
+function cinStmt() {
+  if (  tokens[lookAheadIndex].name == 'cin' ) { 
+    match('cin');   
+    match('>>');
+    result = matchID();
+    match(';');
+    
+   return new Stament('asgmt', [], [result, " = ", "input()"]);
+  } else {
+    throw 'expected cout';
+  }
+}
+
+
+
+ //if (res == '('){
+      //closingBracketsCount ++ ;
+   // }
+    //printResult += res + " " ;
+   // printResult = expr();
+   /* while( (res != ')' || closingBracketsCount >= 0) && res != ';'){
+      res = getNextToken();
+      console.log(res);
+      if (res == ';'){
+        break ;
+      }else if (res == '('){
+        closingBracketsCount ++ ;
+      }else if (res == ')' && closingBracketsCount == 0){
+        lookAheadIndex -- ;
+        break ;
+      }else if (res == ')' && closingBracketsCount > 0){
+        closingBracketsCount --
+      }else if (res == ')' && closingBracketsCount < 0){
+        throw 'expected ) at the end of printf';
+      }
+      console.log(closingBracketsCount);
+      printResult += res + " " ;
+
+    }else{
+      throw "expected string inside printf";
+    }
+    match(')');
+    printResult = printResult.trim()
+    match(';');
+   // 
+    }*/
+// prints -> print ,prints| print | e
+function traversePrints(){
+  if (tokens[lookAheadIndex].name[0] == '"'){
+      let stringCondition = tokens[lookAheadIndex].name[0]
+  }else{
+    throw "expected string or expression inside printf";
+  }
+}
+
 function dataType() {
   if (
     tokens[lookAheadIndex].name == 'int' ||
@@ -502,8 +651,7 @@ function factor() {
  * */
 /****************************************************************************/
 function match(token) {
-  //console.log(token);
-
+  console.log( tokens[lookAheadIndex].name);
   if (token == tokens[lookAheadIndex].name) {
     if (lookAheadIndex < tokens.length) {
       lookAheadIndex++;
@@ -563,8 +711,14 @@ function matchID() {
       return id;
     }
   } else {
-    throw 'expected token ' + token;
+    throw 'expected id';
   }
+}
+
+function getNextToken() {
+    let id = tokens[lookAheadIndex].name;
+    lookAheadIndex++;
+    return id;
 }
 
 /****************************************************************************/

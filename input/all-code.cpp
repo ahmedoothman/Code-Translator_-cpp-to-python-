@@ -7,6 +7,15 @@ int main()
     int b = 0;
     int z = 0;
     int jj = 0;
+    printf("hi there %d %d", y, x, j);
+   // printf("hi there %d %d, y, x, j); //handled
+   // printf("hi there %d %d",, x, j); //handled
+    printf("hi there"); 
+   
+    cin>>x ;
+    cout<<"x is everywhere"<<x<<'\n';
+    
+    
  	if (var < 8 || var > 4 || true  || false  && x >= 4 && x  <= 4){
 
     }else if (true && false){

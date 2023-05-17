@@ -99,7 +99,11 @@ function translateStmt(stmt, block) {
         result += element + ' ';
       });
       return result;
-
+    case 'printf_stmt':
+      stmt.extra.forEach((element) => {
+          result += element;
+      });
+      return result;
     case 'while_stmt':
       result = 'while ';
       result += traverseConds(stmt.extra[0], '');
