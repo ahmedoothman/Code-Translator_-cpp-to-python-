@@ -1,10 +1,10 @@
-
 /****************************************************************************/
 /* Name: main_stmt */
 /****************************************************************************/
 let indentCount = 0;
 let lookAheadIndex = 0;
 let parseTree;
+let lineCount = 0;
 
 function main_stmt() {
   try {
@@ -14,13 +14,15 @@ function main_stmt() {
       match('(');
       match(')');
       match('{');
+      lineCount++;
       child = stmts();
       match('return');
       matchDigit();
       match(';');
+      lineCount++;
       match('}');
       parseTree = new Stament('main_stmt', [child], []);
-      return
+      return;
     } else {
       throw "Can't find main function at the beginning of the program";
     }
@@ -32,21 +34,19 @@ function main_stmt() {
 /* Name: stmts */
 /****************************************************************************/
 function stmts() {
- 
   if (
     tokens[lookAheadIndex].name == 'if' ||
     tokens[lookAheadIndex].name == 'while' ||
     tokens[lookAheadIndex].name == 'for' ||
     tokens[lookAheadIndex].name == 'switch' ||
     tokens[lookAheadIndex].name == 'do' ||
-
     tokens[lookAheadIndex].type == 'var' ||
     tokens[lookAheadIndex].name == 'int' ||
     tokens[lookAheadIndex].name == 'char' ||
-    tokens[lookAheadIndex].name == 'bool' 
-    ) {
+    tokens[lookAheadIndex].name == 'bool'
+  ) {
     let child = stmt();
-    let children = stmts(); 
+    let children = stmts();
     return new Stament('stmts', [child, children], []);
   }
 }
@@ -54,98 +54,108 @@ function stmts() {
 function stmt() {
   if (tokens[lookAheadIndex].name == 'if') {
     return if_stmt();
-  } else if (tokens[lookAheadIndex].name == 'while'){
+  } else if (tokens[lookAheadIndex].name == 'while') {
     return while_stmt();
-  }
-  else if(tokens[lookAheadIndex].name == 'for'){
+  } else if (tokens[lookAheadIndex].name == 'for') {
     return for_stmt();
-  }
-  else if(tokens[lookAheadIndex].name == 'do'){
+  } else if (tokens[lookAheadIndex].name == 'do') {
     return do_while_stmt();
-  }
-  else if(tokens[lookAheadIndex].name == 'switch'){
+  } else if (tokens[lookAheadIndex].name == 'switch') {
     return switch_case_stmt();
-  }
-  else if (tokens[lookAheadIndex].type == 'var' || 
-      tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
-      || tokens[lookAheadIndex].name == 'bool') {
+  } else if (
+    tokens[lookAheadIndex].type == 'var' ||
+    tokens[lookAheadIndex].name == 'int' ||
+    tokens[lookAheadIndex].name == 'char' ||
+    tokens[lookAheadIndex].name == 'bool'
+  ) {
     let result = asgmt();
-    return new Stament("stmt", [result], []);
+
+    return new Stament('stmt', [result], []);
   } else {
     throw 'expected statment';
   }
 }
 
-function if_stmt(){
+function if_stmt() {
   if (tokens[lookAheadIndex].name == 'if') {
     match('if');
     match('(');
     let condChild = conds();
-    if (condChild == null){
-      throw "expected condition inside if";
-    }
-    match(')');         
-    match('{');
-    let children = stmts();
-    match('}');
-    let elseIfChildren =elseif();
-    let elseChildren = else_stmt();
-
-    return new Stament("if_stmt", [children??emptyBloc,endBlock, elseIfChildren, elseChildren ,], [condChild]);
-  }else{
-    throw 'expected if';
-  }
-}
-
-function elseif(){
-  if (tokens[lookAheadIndex].name == 'else if') {
-    match('else if');
-    match('(');
-    let condChild = conds();
-    if (condChild == null){
-      throw "expected condition inside else if";
+    if (condChild == null) {
+      throw 'expected condition inside if';
     }
     match(')');
     match('{');
     let children = stmts();
     match('}');
-    let elseIfChildren =elseif();
-    return new Stament("else_if_stmt", [children??emptyBloc, endBlock , elseIfChildren ], [condChild]);
+    let elseIfChildren = elseif();
+    let elseChildren = else_stmt();
+
+    return new Stament(
+      'if_stmt',
+      [children ?? emptyBloc, endBlock, elseIfChildren, elseChildren],
+      [condChild]
+    );
+  } else {
+    throw 'expected if';
   }
 }
 
-function else_stmt(){
+function elseif() {
+  if (tokens[lookAheadIndex].name == 'else if') {
+    match('else if');
+    match('(');
+    let condChild = conds();
+    if (condChild == null) {
+      throw 'expected condition inside else if';
+    }
+    match(')');
+    match('{');
+    let children = stmts();
+    match('}');
+    let elseIfChildren = elseif();
+    return new Stament(
+      'else_if_stmt',
+      [children ?? emptyBloc, endBlock, elseIfChildren],
+      [condChild]
+    );
+  }
+}
+
+function else_stmt() {
   if (tokens[lookAheadIndex].name == 'else') {
     match('else');
     match('{');
     let children = stmts();
     match('}');
-    return new Stament("else_stmt", [children??emptyBloc, endBlock], []);
+    return new Stament('else_stmt', [children ?? emptyBloc, endBlock], []);
   }
 }
 
-
-function while_stmt(){
+function while_stmt() {
   if (tokens[lookAheadIndex].name == 'while') {
     match('while');
     match('(');
     let condChild = conds();
-    if (condChild == null){
-      throw "expected condition inside while";
+    if (condChild == null) {
+      throw 'expected condition inside while';
     }
-    match(')');         
+    match(')');
     match('{');
     let children = stmts();
     match('}');
 
-    return new Stament("while_stmt", [children??emptyBloc,endBlock], [condChild]);
-  }else{
+    return new Stament(
+      'while_stmt',
+      [children ?? emptyBloc, endBlock],
+      [condChild]
+    );
+  } else {
     throw 'expected while';
   }
 }
 
-
-function for_stmt(){
+function for_stmt() {
   if (tokens[lookAheadIndex].name == 'for') {
     match('for');
     match('(');
@@ -153,20 +163,22 @@ function for_stmt(){
     let condChild = conds();
     match(';');
     let stepChild = asgmt(true);
-    match(')');         
+    match(')');
     match('{');
     let children = stmts();
     match('}');
 
-    return new Stament("for_stmt", [children??emptyBloc,endBlock], [condChild,asgmtChild]);
-  }else{
+    return new Stament(
+      'for_stmt',
+      [children ?? emptyBloc, endBlock],
+      [condChild, asgmtChild]
+    );
+  } else {
     throw 'expected while';
   }
 }
 
-
-
-function do_while_stmt(){
+function do_while_stmt() {
   if (tokens[lookAheadIndex].name == 'do') {
     match('do');
     match('{');
@@ -175,165 +187,185 @@ function do_while_stmt(){
     match('while');
     match('(');
     let condChild = conds();
-    if (condChild == null){
-      throw "expected condition inside do while";
+    if (condChild == null) {
+      throw 'expected condition inside do while';
     }
-    match(')');         
+    match(')');
     match(';');
-    return new Stament("do_while_stmt", [children, _generate_trailing_if(condChild),endBlock], []);
-  }else{
+    return new Stament(
+      'do_while_stmt',
+      [children, _generate_trailing_if(condChild), endBlock],
+      []
+    );
+  } else {
     throw 'expected while';
   }
 }
 
-function _generate_trailing_if(condChild){
-  return new Stament("if_stmt", [new Stament('asgmt', [], ["break;"]),
-      endBlock], [condChild, true]);
+function _generate_trailing_if(condChild) {
+  return new Stament(
+    'if_stmt',
+    [new Stament('asgmt', [], ['break;']), endBlock],
+    [condChild, true]
+  );
 }
 
 // switch_stmt-> switch headnig { switch_stmts}
 // switch_stmts -> switch_stmt switch_stmts | e
 
 // switch_stmt -> case num : stmtm
-function switch_case_stmt(){
+function switch_case_stmt() {
   if (tokens[lookAheadIndex].name == 'switch') {
     match('switch');
     match('(');
-    let varName  = '';
-    if (tokens[lookAheadIndex].type == 'var'){
+    let varName = '';
+    if (tokens[lookAheadIndex].type == 'var') {
       varName = tokens[lookAheadIndex].name;
       match(tokens[lookAheadIndex].name);
-    }else{
-      throw "expected Variable after switch keyword";
+    } else {
+      throw 'expected Variable after switch keyword';
     }
     match(')');
     match('{');
-    let switchChildren = swtich_stmts(varName, false);    
+    let switchChildren = swtich_stmts(varName, false);
     match('}');
-    return new Stament("stmts", [switchChildren,], []);
-  }else{
+    return new Stament('stmts', [switchChildren], []);
+  } else {
     throw 'expected switch';
   }
 }
 
-function swtich_stmts(varName , isElifChain){
+function swtich_stmts(varName, isElifChain) {
   if (
     tokens[lookAheadIndex].name == 'case' ||
-    tokens[lookAheadIndex].name == 'default' 
-   
-    ) {
+    tokens[lookAheadIndex].name == 'default'
+  ) {
     let child = swtich_stmt(varName, isElifChain);
-    let children = swtich_stmts(varName, true); 
-    
+    let children = swtich_stmts(varName, true);
+
     return new Stament('stmts', [child, children], []);
   }
 }
 
-function swtich_stmt(varName ,isElifChain){
+function swtich_stmt(varName, isElifChain) {
   if (tokens[lookAheadIndex].name == 'case') {
     match('case');
     let digit = matchDigit();
     match(':');
     let children = stmts();
-    match("break");
+    match('break');
     match(';');
-    if (isElifChain){
-        return new Stament("else_if_stmt", [children??emptyBloc, endBlock], [_generate_cond_switch(varName, digit)] );
-    }else{
-        return new Stament("if_stmt", [children??emptyBloc,endBlock], [_generate_cond_switch(varName, digit)]   );
+    if (isElifChain) {
+      return new Stament(
+        'else_if_stmt',
+        [children ?? emptyBloc, endBlock],
+        [_generate_cond_switch(varName, digit)]
+      );
+    } else {
+      return new Stament(
+        'if_stmt',
+        [children ?? emptyBloc, endBlock],
+        [_generate_cond_switch(varName, digit)]
+      );
     }
-  }else if (tokens[lookAheadIndex].name == 'default'){
+  } else if (tokens[lookAheadIndex].name == 'default') {
     match('default');
-   
+
     match(':');
     let children = stmts();
     match('break');
     match(';');
-    return new Stament("else_stmt", [children??emptyBloc, endBlock], []);
+    return new Stament('else_stmt', [children ?? emptyBloc, endBlock], []);
   } else {
     throw 'expected statment inside switch case';
   }
 }
 
-function _generate_cond_switch(varName, varValue){
-  return  new Stament("conds", [ new Stament("cond", [] ,[varName, "==", varValue ] ,)], [""]) ;
+function _generate_cond_switch(varName, varValue) {
+  return new Stament(
+    'conds',
+    [new Stament('cond', [], [varName, '==', varValue])],
+    ['']
+  );
 }
-
 
 /****************************************************************************/
 /* Name: asgmt */
 /****************************************************************************/
 function asgmt(passSemiColumn = false) {
-  if (tokens[lookAheadIndex].name == 'int' || tokens[lookAheadIndex].name == 'char'
-     || tokens[lookAheadIndex].name == 'bool') {
+  if (
+    tokens[lookAheadIndex].name == 'int' ||
+    tokens[lookAheadIndex].name == 'char' ||
+    tokens[lookAheadIndex].name == 'bool'
+  ) {
     dataType();
     //let varaibleName = match(tokens[lookAheadIndex].name);
     let varaibleName = matchID();
     match('=');
     //let exprResult = matchDigit();
-    let exprResult = expr() ;
-   
-   passSemiColumn? null :match(';');
-    return new Stament("asgmt", [], [varaibleName, "=", exprResult]);
+    let exprResult = expr();
 
-  }else if (tokens[lookAheadIndex].type == 'var' ) {
+    passSemiColumn ? null : match(';');
+    return new Stament('asgmt', [], [varaibleName, '=', exprResult]);
+  } else if (tokens[lookAheadIndex].type == 'var') {
     let varaibleName = match(tokens[lookAheadIndex].name);
-    if (tokens[lookAheadIndex].name == "+"){
-      match("+");
-      if(tokens[lookAheadIndex].name == "="){
-        match("=");
+    if (tokens[lookAheadIndex].name == '+') {
+      match('+');
+      if (tokens[lookAheadIndex].name == '=') {
+        match('=');
         //let exprResult = matchDigit();
         let exprResult = expr();
-        
-        passSemiColumn? null :match(';');
-        return new Stament("asgmt", [], [varaibleName, "+=", exprResult]);
-      }else if(tokens[lookAheadIndex].name == "+"){
-        match("+");
-        passSemiColumn? null :match(';');
-        return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " + 1"]);
+
+        passSemiColumn ? null : match(';');
+        return new Stament('asgmt', [], [varaibleName, '+=', exprResult]);
+      } else if (tokens[lookAheadIndex].name == '+') {
+        match('+');
+        passSemiColumn ? null : match(';');
+        return new Stament(
+          'asgmt',
+          [],
+          [varaibleName, '=', varaibleName, ' + 1']
+        );
       }
-      
-      
-
-    }else if(tokens[lookAheadIndex].name == "-"){
-      match("-");
-      if(tokens[lookAheadIndex].name == "="){
-        match("=");
+    } else if (tokens[lookAheadIndex].name == '-') {
+      match('-');
+      if (tokens[lookAheadIndex].name == '=') {
+        match('=');
         //let exprResult = matchDigit();
         let exprResult = expr();
-        passSemiColumn? null :match(';');
-        return new Stament("asgmt", [], [varaibleName, "-=", exprResult]);
-      }else if(tokens[lookAheadIndex].name == "-"){
-          match("-");
-          passSemiColumn? null :match(';');
-          return new Stament("asgmt", [], [varaibleName, "=" , varaibleName, " - 1"]);
+        passSemiColumn ? null : match(';');
+        return new Stament('asgmt', [], [varaibleName, '-=', exprResult]);
+      } else if (tokens[lookAheadIndex].name == '-') {
+        match('-');
+        passSemiColumn ? null : match(';');
+        return new Stament(
+          'asgmt',
+          [],
+          [varaibleName, '=', varaibleName, ' - 1']
+        );
       }
-      
-      match("=");
-    }else if(tokens[lookAheadIndex].name == "*"){
-      match("*");
-      match("=");
-        //let exprResult = matchDigit();
-        let exprResult = expr();
-      passSemiColumn? null :match(';');
-      return new Stament("asgmt", [], [varaibleName, "*=", exprResult]);
 
-    }else if(tokens[lookAheadIndex].name == "/"){
-      match("/");
-      match("=");
-      let exprResult = expr();
-      passSemiColumn? null :match(';');
-      return new Stament("asgmt", [], [varaibleName, "/=", exprResult]);
-
-    }else{
       match('=');
-        let exprResult = expr();
-      passSemiColumn? null :match(';');
-      return new Stament("asgmt", [], [varaibleName, "=", exprResult]);
-
+    } else if (tokens[lookAheadIndex].name == '*') {
+      match('*');
+      match('=');
+      //let exprResult = matchDigit();
+      let exprResult = expr();
+      passSemiColumn ? null : match(';');
+      return new Stament('asgmt', [], [varaibleName, '*=', exprResult]);
+    } else if (tokens[lookAheadIndex].name == '/') {
+      match('/');
+      match('=');
+      let exprResult = expr();
+      passSemiColumn ? null : match(';');
+      return new Stament('asgmt', [], [varaibleName, '/=', exprResult]);
+    } else {
+      match('=');
+      let exprResult = expr();
+      passSemiColumn ? null : match(';');
+      return new Stament('asgmt', [], [varaibleName, '=', exprResult]);
     }
-
-  }else {
+  } else {
     throw 'expected identifier';
   }
 }
@@ -344,136 +376,119 @@ function dataType() {
     tokens[lookAheadIndex].name == 'char' ||
     tokens[lookAheadIndex].name == 'bool'
   ) {
-    let token =tokens[lookAheadIndex].name;
+    let token = tokens[lookAheadIndex].name;
     match(tokens[lookAheadIndex].name);
     return token;
   }
-  return null ;
+  return null;
 }
 
-
-function conds(){
-  if (tokens[lookAheadIndex].type == 'var'
-         || tokens[lookAheadIndex].name == "true" 
-         || tokens[lookAheadIndex].name == "false") {
+function conds() {
+  if (
+    tokens[lookAheadIndex].type == 'var' ||
+    tokens[lookAheadIndex].name == 'true' ||
+    tokens[lookAheadIndex].name == 'false'
+  ) {
     let condNode = cond();
-    let condsNode= null ;
-    if (tokens[lookAheadIndex].name == "&&"){
-      match("&&");
+    let condsNode = null;
+    if (tokens[lookAheadIndex].name == '&&') {
+      match('&&');
       condsNode = conds();
-      return new Stament("conds", [condNode, condsNode] ,["and"] );
-
-    }else if (tokens[lookAheadIndex].name == "||"){
-      match("||");
+      return new Stament('conds', [condNode, condsNode], ['and']);
+    } else if (tokens[lookAheadIndex].name == '||') {
+      match('||');
       condsNode = conds();
-      return new Stament("conds", [condNode, condsNode] ,["or"] );
-
-    }else{
-      return new Stament("conds", [condNode,] ,[""] );
+      return new Stament('conds', [condNode, condsNode], ['or']);
+    } else {
+      return new Stament('conds', [condNode], ['']);
     }
-
-  }   
+  }
 }
 
-
-function cond(){
+function cond() {
   if (tokens[lookAheadIndex].type == 'var') {
     let id = match(tokens[lookAheadIndex].name);
-    let relop =matchRelop(tokens[lookAheadIndex].name);
+    let relop = matchRelop(tokens[lookAheadIndex].name);
     //let exprResult = matchDigit();
     let digit = expr();
-    return new Stament("cond", [] ,[id, relop, digit] );
-  }else if (tokens[lookAheadIndex].name == "true"){
-    match("true");
+    return new Stament('cond', [], [id, relop, digit]);
+  } else if (tokens[lookAheadIndex].name == 'true') {
+    match('true');
 
-    return new Stament("cond", [] ,["True", "", ""] );
-  } else if (tokens[lookAheadIndex].name == "false"){
-    match("false");
-    return new Stament("cond", [] ,["False", "", ""]);
+    return new Stament('cond', [], ['True', '', '']);
+  } else if (tokens[lookAheadIndex].name == 'false') {
+    match('false');
+    return new Stament('cond', [], ['False', '', '']);
   }
 }
 
-
-
-
-function expr (){
-  if (isNumeric(tokens[lookAheadIndex].name) ||
-     tokens[lookAheadIndex].type == "var" ||  tokens[lookAheadIndex].name == '(') {
-      
+function expr() {
+  if (
+    isNumeric(tokens[lookAheadIndex].name) ||
+    tokens[lookAheadIndex].type == 'var' ||
+    tokens[lookAheadIndex].name == '('
+  ) {
     let termResult = term();
     let restResult = rest();
-  
-  return  termResult + " " +  restResult ;
-}else{
-  throw "expected identifier digit or a bracket in assignment";
-}
-}
 
-
-function term (){
-  
-  let factorResult = factor();
- 
-  let result1Result = rest1();
-  return factorResult + " " +  result1Result ;
-
-}
-
-
-function rest (){
-  if (tokens[lookAheadIndex].name == '+') {
-    match('+'); 
-    let termResult = term(); 
-    let restResult = rest();
-    return "+ "+ termResult + restResult;
-
-  } else if (tokens[lookAheadIndex].name == '-') {
-    match('-'); 
-    let termResult = term(); 
-    let restResult = rest();
-    return "-" + termResult + " " +restResult ;
-
+    return termResult + ' ' + restResult;
+  } else {
+    throw 'expected identifier digit or a bracket in assignment';
   }
-  return "" ;
- 
 }
 
+function term() {
+  let factorResult = factor();
 
-function rest1(){
+  let result1Result = rest1();
+  return factorResult + ' ' + result1Result;
+}
+
+function rest() {
+  if (tokens[lookAheadIndex].name == '+') {
+    match('+');
+    let termResult = term();
+    let restResult = rest();
+    return '+ ' + termResult + restResult;
+  } else if (tokens[lookAheadIndex].name == '-') {
+    match('-');
+    let termResult = term();
+    let restResult = rest();
+    return '-' + termResult + ' ' + restResult;
+  }
+  return '';
+}
+
+function rest1() {
   if (tokens[lookAheadIndex].name == '*') {
-    match('*'); 
-    let factorResult = factor(); 
+    match('*');
+    let factorResult = factor();
     let rest1Result = rest1();
-    return  "* "+ factorResult + " " + rest1Result;
+    return '* ' + factorResult + ' ' + rest1Result;
   } else if (tokens[lookAheadIndex].name == '/') {
-    match('/'); 
-    let factorResult = factor(); 
+    match('/');
+    let factorResult = factor();
     let rest1Result = rest1();
-    return  "/" + factorResult + " " +  rest1Result;
-
-  } 
-  return "" ;
+    return '/' + factorResult + ' ' + rest1Result;
+  }
+  return '';
 }
 
-
-function factor(){
+function factor() {
   if (isNumeric(tokens[lookAheadIndex].name)) {
     return matchDigit();
-
-  }else if ( tokens[lookAheadIndex].type == "var") {
+  } else if (tokens[lookAheadIndex].type == 'var') {
     let id = matchID();
-    return  id;
-  }else if (lookahead = '(') {
+    return id;
+  } else if ((lookahead = '(')) {
     match('(');
     let exprResult = expr();
     match(')');
-    return "( " + exprResult + " )";
-  }
-  else{
-    throw "expected number, digit or an expression in factor";
+    return '( ' + exprResult + ' )';
+  } else {
+    throw 'expected number, digit or an expression in factor';
   }
 }
-
 
 /****************************************************************************/
 /* Name: Match */
@@ -502,12 +517,18 @@ function match(token) {
 }
 
 function matchRelop(token) {
-  if (token == '==' || token == '>=' || token == '<='
-      || token == '!=' || token == '<' || token == '>') {
-      lookAheadIndex++;
-      return token;
+  if (
+    token == '==' ||
+    token == '>=' ||
+    token == '<=' ||
+    token == '!=' ||
+    token == '<' ||
+    token == '>'
+  ) {
+    lookAheadIndex++;
+    return token;
   } else {
-    throw 'expected relop ' ;
+    throw 'expected relop ';
   }
 }
 /****************************************************************************/
@@ -526,28 +547,25 @@ function matchDigit() {
     if (lookAheadIndex < tokens.length) {
       let digit = tokens[lookAheadIndex].name;
       lookAheadIndex++;
-    
+
       return digit;
     }
   } else {
-    throw 'expected token ' + token;
+    throw 'expected digit ';
   }
 }
 
-
 function matchID() {
-  if (tokens[lookAheadIndex].type == "var") {
+  if (tokens[lookAheadIndex].type == 'var') {
     if (lookAheadIndex < tokens.length) {
       let id = tokens[lookAheadIndex].name;
-      lookAheadIndex ++ ;
+      lookAheadIndex++;
       return id;
     }
   } else {
     throw 'expected token ' + token;
   }
 }
-
-
 
 /****************************************************************************/
 /* Name: isNumeric */
@@ -573,20 +591,8 @@ class Stament {
     this.stmt_type = stmt_type;
     this.children = children;
     this.extra = extra;
-
   }
 }
 const endBlock = new Stament('end_block', [], []);
 
-const emptyBloc = new Stament('asgmt', [], ["pass"]);
-
-
-
-
-
-
-
-
-
-
-
+const emptyBloc = new Stament('asgmt', [], ['pass']);
